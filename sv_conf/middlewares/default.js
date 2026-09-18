@@ -1,4 +1,4 @@
-export function setTimestamp(req, res, next){
+function setTimestamp(req, res, next){
     console.log("executed")
     res.locals.timestamp = {
         'timestamp': new Date().toISOString()
@@ -9,7 +9,7 @@ export function setTimestamp(req, res, next){
 
 // The counter is storaged in backend memory
 // Redis data base is better for big systems
-export function validateRateLimit(req, res, next){
+function validateRateLimit(req, res, next){
     // Access IP of the origin device
     
 
@@ -26,12 +26,23 @@ export function validateRateLimit(req, res, next){
     next()
 }
 
-export function createResponseFormat(req, res, next){
-    req.locals.format = {
+function createResponseFormat(req, res, next){
+    res.locals.format = {
         'status': "successful",
         'error': null,
         'data': {
-            'timestamp': req.locals.timestamp
+            ...res.locals.timestamp
         }
     }
+
+    next()
+}
+
+
+export default function getDefaultMiddlewares(){
+    return [
+        setTimestamp,
+        validateRateLimit,
+        createResponseFormat
+    ]
 }

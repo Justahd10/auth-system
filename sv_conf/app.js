@@ -1,22 +1,19 @@
 /*
         Backend building
 */
-// Start enviroment variables
-import "dotenv/config"
+import getDefaultMiddlewares from "./middlewares/default.js"
 
 import express from "express"
-import setRouting from "./routes/config.js"
 
 
 
-export default function startServer(){
-    // Start Express.js server instance
-    const app = express()
-    
-    // Settings
-    setRouting(app)
+const app = express()
 
-    app.listen(process.env.SV_NAME, ()=>{
-        console.log("Server started.")
-    })
-}
+// Native middlewares
+app.use(express.json())
+
+// Application level middlewares for
+// default use by all server routes
+app.use(getDefaultMiddlewares())
+
+export default app
