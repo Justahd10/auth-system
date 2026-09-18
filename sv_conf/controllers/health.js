@@ -1,4 +1,4 @@
-class HealthController{
+export default class HealthController{
     constructor(service){
         this.service = service
     }
@@ -6,15 +6,12 @@ class HealthController{
     testResponse(req, res){
         const testData = 
         this.service.setEchoResponse()
+        
+        req.locals.format.data ={
+            ...req.locals.format.data,
+            ...testData
+        }
 
-        res.status(200).json({
-            'status': "successful",
-            'error': null,
-            'data': Object.assign(
-                testData, res.locals.timestamp
-            )
-        })
+        res.status(200).json(req.locals.format)
     }
 }
-
-export default HealthController

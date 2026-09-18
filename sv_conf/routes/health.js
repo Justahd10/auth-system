@@ -1,7 +1,7 @@
 import HealthService from "../services/health.js"
 import HealthController from "../controllers/health.js"
 
-import { appendTimestamp } from "../middlewares/default.js"
+import { setTimestamp, createResponseFormat } from "../middlewares/default.js"
 
 
 
@@ -11,7 +11,7 @@ const healthController = new HealthController(healthService)
 
 function setHealthServiceRoutes(app){
     app.get(
-        "/health/ping", [appendTimestamp], 
+        "/health/ping", [setTimestamp, createResponseFormat], 
         (req, res)=> healthController.testResponse(req, res)
     )
     
