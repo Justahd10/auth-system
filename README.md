@@ -29,3 +29,11 @@ and user session (tokens)
 
 ## Google
 1. Provide the google social login service for the centrelized authentication system
+
+# Data base
+- Selected Postgres as data base tecnologay because i am alredy have installed
+- Integration: installed pg-promise library for the express.js framework
+
+```shell
+npm install pg-promise
+```

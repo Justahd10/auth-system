@@ -11,6 +11,7 @@ const app = express()
 
 // Native middlewares
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 // Application level middlewares for
 // default use by all server routes

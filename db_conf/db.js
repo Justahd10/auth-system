@@ -3,7 +3,7 @@ import pgPromise from "pg-promise"
 
 
 // Postgres connection string
-const connection = process.env.DB_CONNECTION
+const connection = process.env.CONNECTION
 
 // Database instance
 const pgp = pgPromise()
