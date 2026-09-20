@@ -1,12 +1,13 @@
 // Helpers
-import { prepareResponse } from "../../utils.js"
+import { prepareResponse, sendErrorResponse } from "../../utils.js"
 
 
 
 export default class UserController{
-    #Errors ={
+    static Errors ={
         'credFormat': 422,
-        'emailExists': 409
+        'emailExists': 409,
+        'invalidCreds': 401
     }
     
     constructor(service){
@@ -16,7 +17,7 @@ export default class UserController{
     async handleRegister(req, res){
         // 1. Try create user
         try {
-            const user = await this.service.registerUser(
+            await this.service.registerUser(
                 req.body.email, req.body.password
             )
 
@@ -30,14 +31,26 @@ export default class UserController{
 
         } catch (error){
             // 2. Return error strucuture
-            prepareResponse({
-                'type': "error",
-                'response': res,
-                'values': { 'error': error.message }
-            })
-
-            const code = this.#Errors[error.cause?.type] ?? 500
-            return res.status(code).json(res.locals.format)
+            return sendErrorResponse(error, UserController, res)
         }
+    }
+
+    async handleLogin(req, res){
+        // 1. Try access user account datas
+        try {
+            await this.service.accessUserAccount(
+                req.body.email, req.body.password
+            )
+
+            // 2. Return successful strucutre
+            prepareResponse({'response': res })
+
+            return res.status(200).json(res.locals.format)
+
+        } catch (error){
+            // 2. Return error strucuture
+            return sendErrorResponse(error, UserController, res)
+        }
+            
     }
 }

@@ -6,10 +6,23 @@ export function prepareResponse({ type = "success", response, values }){
             break;
 
         case "success":
-            response.locals.format.data ={
-                ...response.locals.format.data,
-                ...values
+            if (values){
+                response.locals.format.data ={
+                    ...response.locals.format.data,
+                    ...values
+                }
+                break;
             }
-            break;
     }
+}
+
+export function sendErrorResponse(err, controller, res){
+    prepareResponse({
+        'type': "error",
+        'response': res,
+        'values': { 'error': err.message}
+    })
+    
+    const code = controller.Errors[err.cause?.type] ?? 500
+    return res.status(code).json(res.locals.format)
 }

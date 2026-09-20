@@ -29,11 +29,11 @@ export default class UserService{
         const user = 
         await this.repository.selectUserByEmail(email)
 
-        if (user.length > 0){
-            throw Error("Email alredy exists", {
-                'cause': { 'type': "emailExists" }
-            })
+        if (user.length === 0){
+            return null
         }
+
+        return user[0]
     }
 
     async registerUser(email, password){
@@ -43,11 +43,36 @@ export default class UserService{
         this.#checkCredentialsFormat(user)
 
         // 2. Check if email alredy exists
-        await this.#checkEmailExists(user.email)
+        const userRaw = await this.#checkEmailExists(user.email)
+        if (userRaw){
+            throw Error("Email alredy exists", {
+                'cause': { 'type': "emailExists" }
+            })
+        }
         
-        // 2. do database query
+        // 3. do register query into data base
+        user.hashPassword()
         await this.repository.insertUser(user)
 
         return user
+    }
+
+    async accessUserAccount(email, password){
+        // 1. Check data formats
+        const user = new User(email, password)
+
+        this.#checkCredentialsFormat(user)
+
+        // 2. Validate both credentials
+        const userRaw = await this.#checkEmailExists(user.email)
+
+        if (!(
+            userRaw && 
+            User.comparePassword(password, userRaw.password)
+        )){
+            throw Error("Invalid credentials", {
+                'cause': { 'type': "invalidCreds" }
+            })
+        }
     }
 }
