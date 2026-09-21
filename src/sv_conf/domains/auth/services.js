@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken"
 
 
 
-export default class UserService{
+export default class AuthService{
 
     constructor(repository){
         this.repository = repository
@@ -28,12 +28,9 @@ export default class UserService{
     }
 
     async #checkEmailExists(email){
-        const user = 
-        await this.repository.selectUserByEmail(email)
+        const user = await this.repository.selectAccountByEmail(email)
 
-        if (user.length === 0){
-            return null
-        }
+        if (user.length === 0) return null
 
         return user[0]
     }
@@ -49,7 +46,7 @@ export default class UserService{
         )   
     }
 
-    async registerUserAccount(email, password){
+    async registerAccount(email, password){
         // 1. Check data formats
         const user = new User(email, password)
 
@@ -65,7 +62,7 @@ export default class UserService{
         
         // 3. do register query into data base
         user.hashPassword()
-        const userId = await this.repository.insertUser(user)
+        const userId = await this.repository.insertAccount(user)
 
         // 4. return access token
         const accessToken = this.#generateAccessToken(userId)
@@ -73,7 +70,7 @@ export default class UserService{
         return accessToken
     }
 
-    async accessUserAccount(email, password){
+    async accessAccount(email, password){
         // 1. Check data formats
         const user = new User(email, password)
 

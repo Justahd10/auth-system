@@ -3,7 +3,7 @@ import { prepareResponse, sendErrorResponse } from "../../utils.js"
 
 
 
-export default class UserController{
+export default class AuthController{
     static Errors ={
         'credFormat': 422,
         'emailExists': 409,
@@ -15,9 +15,9 @@ export default class UserController{
     }
 
     async handleRegister(req, res){
-        // 1. Try create user
+        // 1. Try create account
         try {
-            const accessToken = await this.service.registerUserAccount(
+            const accessToken = await this.service.registerAccount(
                 req.body.email, req.body.password
             )
 
@@ -34,14 +34,14 @@ export default class UserController{
 
         } catch (error){
             // 2. Return error strucuture
-            return sendErrorResponse(error, UserController, res)
+            return sendErrorResponse(error, AuthController, res)
         }
     }
 
     async handleLogin(req, res){
-        // 1. Try access user account datas
+        // 1. Try access account data
         try {
-            const accessToken = await this.service.accessUserAccount(
+            const accessToken = await this.service.accessAccount(
                 req.body.email, req.body.password
             )
 
@@ -58,7 +58,7 @@ export default class UserController{
 
         } catch (error){
             // 2. Return error strucuture
-            return sendErrorResponse(error, UserController, res)
+            return sendErrorResponse(error, AuthController, res)
         }
             
     }

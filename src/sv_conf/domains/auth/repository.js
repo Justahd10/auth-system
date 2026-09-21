@@ -9,7 +9,7 @@ export default class UserRepository{
         this.db.any()
     }
 
-    async insertUser(userData){
+    async insertAccount(userData){
         const userId = await this.db.query(
             `INSERT INTO users("email", "password") VALUES ($1, $2) RETURNING id;`, 
             [userData.email, userData.password]
@@ -18,19 +18,19 @@ export default class UserRepository{
         return userId
     }
 
-    async updateUser(){
+    async updateAccount(){
         this.db.any()
     }
 
-    async dropUser(){
+    async dropAccount(){
         this.db.any()
     }
 
 
     // Specif querys
-    async selectUserByEmail(userEmail){
+    async selectAccountByEmail(authEmail){
         const userRaw = await this.db.query(`SELECT * FROM users WHERE "email" = $1;`,
-            [userEmail]
+            [authEmail]
         );
 
         return userRaw
