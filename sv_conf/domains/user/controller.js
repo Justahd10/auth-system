@@ -17,7 +17,7 @@ export default class UserController{
     async handleRegister(req, res){
         // 1. Try create user
         try {
-            await this.service.registerUser(
+            await this.service.registerUserAccount(
                 req.body.email, req.body.password
             )
 

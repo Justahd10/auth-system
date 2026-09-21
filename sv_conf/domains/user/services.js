@@ -1,4 +1,5 @@
 import User from "./model.js";
+import jwt from "jsonwebtoken"
 
 
 
@@ -36,7 +37,37 @@ export default class UserService{
         return user[0]
     }
 
-    async registerUser(email, password){
+    #generateToken(tokenDatas){
+        // 1. preapre tokens return
+        const tokens ={ 'access': null, 'refresh': null }
+
+        // 2. preapre expiration times
+        const expTimes ={
+            'access': Number(process.env.ACCESS_TOKEN_EXP),
+            'refresh': Number(process.env.REFRESH_TOKEN_EXP)
+        }
+
+        // 3. Create tokens
+        Object.keys(tokenDatas).forEach(tokenData=> {
+            tokens[tokenData.type] = jwt.sign(
+                tokenData.data,
+                process.env.TOKEN_SECRET,
+                {
+                    'header': {'typ': tokenData.type},
+                    'issuer': process.env.TOKEN_ISSUER,
+                    'expiresIn': expTimes[tokenData.type]
+                }
+            )
+        })
+        
+        return tokens
+    }
+
+    #validateToken(type){
+        
+    }
+
+    async registerUserAccount(email, password){
         // 1. Check data formats
         const user = new User(email, password)
 
@@ -54,7 +85,7 @@ export default class UserService{
         user.hashPassword()
         await this.repository.insertUser(user)
 
-        return user
+        // 4. return session tokens
     }
 
     async accessUserAccount(email, password){
@@ -74,5 +105,7 @@ export default class UserService{
                 'cause': { 'type': "invalidCreds" }
             })
         }
+
+        // 3. return session tokens
     }
 }
