@@ -17,14 +17,17 @@ export default class UserController{
     async handleRegister(req, res){
         // 1. Try create user
         try {
-            await this.service.registerUserAccount(
+            const accessToken = await this.service.registerUserAccount(
                 req.body.email, req.body.password
             )
 
             // 2. Return successful strucutre
             prepareResponse({
                 'response': res,
-                'values': {'email': req.body.email}
+                'values': {
+                    'access_token': accessToken,
+                    'type': "Bearer"
+                }
             })
 
             return res.status(200).json(res.locals.format)
@@ -38,12 +41,18 @@ export default class UserController{
     async handleLogin(req, res){
         // 1. Try access user account datas
         try {
-            await this.service.accessUserAccount(
+            const accessToken = await this.service.accessUserAccount(
                 req.body.email, req.body.password
             )
 
             // 2. Return successful strucutre
-            prepareResponse({'response': res })
+            prepareResponse({
+                'response': res,
+                'values': {
+                    'accessToken': accessToken,
+                    'type': "Bearer"
+                }
+            })
 
             return res.status(200).json(res.locals.format)
 

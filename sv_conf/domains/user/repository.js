@@ -10,10 +10,12 @@ export default class UserRepository{
     }
 
     async insertUser(userData){
-        await this.db.query(
-            `INSERT INTO users("email", "password") VALUES ($1, $2)`, 
+        const userId = await this.db.query(
+            `INSERT INTO users("email", "password") VALUES ($1, $2) RETURNING id;`, 
             [userData.email, userData.password]
-        );
+        )[0];
+
+        return userId
     }
 
     async updateUser(){
@@ -27,7 +29,7 @@ export default class UserRepository{
 
     // Specif querys
     async selectUserByEmail(userEmail){
-        const userRaw = await this.db.query(`SELECT * FROM users WHERE "email" = $1`,
+        const userRaw = await this.db.query(`SELECT * FROM users WHERE "email" = $1;`,
             [userEmail]
         );
 

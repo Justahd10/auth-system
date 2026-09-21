@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken"
 
 
 export default class UserService{
+
     constructor(repository){
         this.repository = repository
     }
@@ -37,34 +38,15 @@ export default class UserService{
         return user[0]
     }
 
-    #generateToken(tokenDatas){
-        // 1. preapre tokens return
-        const tokens ={ 'access': null, 'refresh': null }
-
-        // 2. preapre expiration times
-        const expTimes ={
-            'access': Number(process.env.ACCESS_TOKEN_EXP),
-            'refresh': Number(process.env.REFRESH_TOKEN_EXP)
-        }
-
-        // 3. Create tokens
-        Object.keys(tokenDatas).forEach(tokenData=> {
-            tokens[tokenData.type] = jwt.sign(
-                tokenData.data,
-                process.env.TOKEN_SECRET,
-                {
-                    'header': {'typ': tokenData.type},
-                    'issuer': process.env.TOKEN_ISSUER,
-                    'expiresIn': expTimes[tokenData.type]
-                }
-            )
-        })
-        
-        return tokens
-    }
-
-    #validateToken(type){
-        
+    #generateAccessToken(userId){
+        return jwt.sign({ 'sub': userId },
+            process.env.TOKEN_SECRET,
+            {
+                'header': { 'typ': "JWT" },
+                'issuer': process.env.TOKEN_ISSUER,
+                'expiresIn': Number(process.env.ACCESS_TOKEN_EXP)
+            }
+        )   
     }
 
     async registerUserAccount(email, password){
@@ -83,9 +65,12 @@ export default class UserService{
         
         // 3. do register query into data base
         user.hashPassword()
-        await this.repository.insertUser(user)
+        const userId = await this.repository.insertUser(user)
 
-        // 4. return session tokens
+        // 4. return access token
+        const accessToken = this.#generateAccessToken(userId)
+
+        return accessToken
     }
 
     async accessUserAccount(email, password){
@@ -106,6 +91,9 @@ export default class UserService{
             })
         }
 
-        // 3. return session tokens
+        // 3. return access token
+        const accessToken = this.#generateAccessToken(userRaw.id)
+
+        return accessToken
     }
 }
