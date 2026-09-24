@@ -15,6 +15,6 @@ export default class HealthController{
             'response': res, 'values': testData
         })
 
-        res.status(200).json(res.locals.format)
+        res.status(200).json(res.locals.payload)
     }
 }

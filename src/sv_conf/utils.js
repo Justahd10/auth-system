@@ -1,14 +1,20 @@
+// helper function
+export function returnRes(statusCode, res){
+    return res.status(statusCode).json(res.locals.payload)
+}
+
+
 export function prepareResponse({ type = "success", response, values }){
     switch(type){
         case "error":
-            response.locals.format.status = "unsuccessful";
-            response.locals.format.error = values.error;
+            response.locals.payload.status = "unsuccessful";
+            response.locals.payload.error = values.error;
             break;
 
         case "success":
             if (values){
-                response.locals.format.data ={
-                    ...response.locals.format.data,
+                response.locals.payload.data ={
+                    ...response.locals.payload.data,
                     ...values
                 }
                 break;
@@ -24,5 +30,5 @@ export function sendErrorResponse(err, controller, res){
     })
     
     const code = controller.Errors[err.cause?.type] ?? 500
-    return res.status(code).json(res.locals.format)
+    return res.status(code).json(res.locals.payload)
 }

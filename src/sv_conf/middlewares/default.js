@@ -9,8 +9,8 @@ function setTimestamp(req, res, next){
     next()
 }
 
-function createResponseFormat(req, res, next){
-    res.locals.format = {
+function createPayload(req, res, next){
+    res.locals.payload = {
         'status': "successful",
         'error': null,
         'data': {
@@ -25,7 +25,7 @@ function createResponseFormat(req, res, next){
 export default function getDefaultMiddlewares(){
     return [
         setTimestamp,
-        createResponseFormat,
+        createPayload,
         validateRateLimit
     ]
 }

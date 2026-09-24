@@ -1,5 +1,5 @@
 // Helpers
-import { prepareResponse, sendErrorResponse } from "../../utils.js"
+import { prepareResponse, sendErrorResponse, returnRes } from "../../utils.js"
 
 
 
@@ -30,11 +30,13 @@ export default class AuthController{
                 }
             })
 
-            return res.status(200).json(res.locals.format)
+            return returnRes(200, res)
 
         } catch (error){
             // 2. Return error strucuture
-            return sendErrorResponse(error, AuthController, res)
+            return sendErrorResponse(
+                error, AuthController, res
+            )
         }
     }
 
@@ -54,12 +56,13 @@ export default class AuthController{
                 }
             })
 
-            return res.status(200).json(res.locals.format)
+            return returnRes(200, res)
 
         } catch (error){
             // 2. Return error strucuture
-            return sendErrorResponse(error, AuthController, res)
-        }
-            
+            return sendErrorResponse(
+                error, AuthController, res
+            )
+        }   
     }
 }

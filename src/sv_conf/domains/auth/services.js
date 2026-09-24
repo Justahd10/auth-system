@@ -29,14 +29,13 @@ export default class AuthService{
 
     async #checkEmailExists(email){
         const user = await this.repository.selectAccountByEmail(email)
-
         if (user.length === 0) return null
 
         return user[0]
     }
 
-    #generateAccessToken(userId){
-        return jwt.sign({ 'sub': userId },
+    #generateAccessToken(userId, userRole){
+        return jwt.sign({ 'sub': userId, 'role': userRole },
             process.env.TOKEN_SECRET,
             {
                 'header': { 'typ': "JWT" },
@@ -53,7 +52,7 @@ export default class AuthService{
         this.#checkCredentialsFormat(user)
 
         // 2. Check if email alredy exists
-        const userRaw = await this.#checkEmailExists(user.email)
+        let userRaw = await this.#checkEmailExists(user.email)
         if (userRaw){
             throw Error("Email alredy exists", {
                 'cause': { 'type': "emailExists" }
@@ -62,10 +61,12 @@ export default class AuthService{
         
         // 3. do register query into data base
         user.hashPassword()
-        const userId = await this.repository.insertAccount(user)
+        userRaw = await this.repository.insertAccount(user)
 
         // 4. return access token
-        const accessToken = this.#generateAccessToken(userId)
+        const accessToken = this.#generateAccessToken(
+            userRaw.id, userRaw.role
+        )
 
         return accessToken
     }
@@ -89,7 +90,9 @@ export default class AuthService{
         }
 
         // 3. return access token
-        const accessToken = this.#generateAccessToken(userRaw.id)
+        const accessToken = this.#generateAccessToken(
+            userRaw.id, userRaw.role
+        )
 
         return accessToken
     }

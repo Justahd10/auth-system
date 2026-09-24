@@ -84,7 +84,7 @@ export default function validateRateLimit(req, res, next){
             'values': {'error': "Too many requests"},
         })
 
-        return res.status(429).json(res.locals.format)
+        return res.status(429).json(res.locals.payload)
     }
 
     next()
