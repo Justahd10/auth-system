@@ -3,7 +3,6 @@ import validateRateLimit from "./rate-limit.js"
 
 
 function setTimestamp(req, res, next){
-    console.log("executed")
     res.locals.timestamp = {
         'timestamp': new Date().toISOString()
     }
