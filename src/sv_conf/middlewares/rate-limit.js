@@ -1,19 +1,22 @@
-/*
-    The counter is storaged in backend memory
-    Redis data base is better for big systems
-
-    // Example of rate limit memory structure
-    const ratemapper ={
-        "192.168.10.1": {
-            'totalAccess': 0,
-            'lastAccess': 2026-09-20T01:45:36.485Z
-        }
-    }
-*/
 import { prepareResponse } from "../utils.js";
 
 
 
+/**
+ * Validate rate limit for each request
+ * @param {Request} req 
+ * @param {Response} res 
+ * @param {Function} next
+ * 
+ * @example
+ * // Example of rate limit memory structure
+    const ratemapper ={
+        "192.168.10.1": {
+            'totalAccess': 0,
+            'lastAccess': "2026-09-20T01:45:36.485Z"
+        }
+    }
+ */
 class RateLimit{
     #ratemapper = {}
     #limit = 5

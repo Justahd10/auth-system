@@ -1,5 +1,8 @@
 // Helpers
-import { prepareResponse, sendErrorResponse, returnRes } from "../../utils.js"
+import {
+    sendErrorResponse, returnRes,
+    setAuthCookie
+} from "../../utils.js"
 
 
 
@@ -21,19 +24,13 @@ export default class AuthController{
                 req.body.email, req.body.password
             )
 
-            // 2. Return successful strucutre
-            prepareResponse({
-                'response': res,
-                'values': {
-                    'access_token': accessToken,
-                    'type': "Bearer"
-                }
-            })
+            // 2. Prepare credentials
+            setAuthCookie("access_token", res, accessToken)
 
             return returnRes(200, res)
 
         } catch (error){
-            // 2. Return error strucuture
+            // 3. Return error strucuture
             return sendErrorResponse(
                 error, AuthController, res
             )
@@ -47,19 +44,13 @@ export default class AuthController{
                 req.body.email, req.body.password
             )
 
-            // 2. Return successful strucutre
-            prepareResponse({
-                'response': res,
-                'values': {
-                    'accessToken': accessToken,
-                    'type': "Bearer"
-                }
-            })
+            // 2. Prepare credentials
+            setAuthCookie("access_token", res, accessToken)
 
             return returnRes(200, res)
 
         } catch (error){
-            // 2. Return error strucuture
+            // 3. Return error strucuture
             return sendErrorResponse(
                 error, AuthController, res
             )
