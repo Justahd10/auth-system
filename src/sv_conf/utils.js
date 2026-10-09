@@ -1,4 +1,8 @@
-// helper function
+/**
+ * @param {number} statusCode 
+ * @param {import('express').Response} res 
+ * @returns 
+ */
 export function returnRes(statusCode, res) {
   return res.status(statusCode).json(res.locals.payload)
 }
@@ -6,7 +10,6 @@ export function returnRes(statusCode, res) {
 
 
 /**
- * 
  * @param {{
  *  "type": "success" | "error",
  *  "response": import('express').Response,
@@ -49,7 +52,12 @@ export function resolveErrorResponse(errorCode, errorsMap, res) {
   return res.status(statusCode).json(res.locals.payload);
 }
 
-export function setAuthCookie(type = "access", response, token) {
+/**
+ * @param {"access" | "refres"} type 
+ * @param {import('express').Response} res
+ * @param {string} token
+ */
+export function setAuthCookie(type = "access", res, token) {
   // 1. Define default values
   let expMinutes = 30;
   let name = "access_token"
@@ -61,7 +69,7 @@ export function setAuthCookie(type = "access", response, token) {
   }
 
   // 3. Set cookie
-  response.cookie(name, token, {
+  res.cookie(name, token, {
     'sameSite': true,
     'httpOnly': true,
     'maxAge': 1000 * 60 * expMinutes
