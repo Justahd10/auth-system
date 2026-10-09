@@ -3,97 +3,132 @@ import jwt from "jsonwebtoken"
 
 
 
-export default class AuthService{
+export default class AuthService {
 
-    constructor(repository){
-        this.repository = repository
-    }
+	/**
+	 * @param {import('./repository.js').default} repository 
+	 */
+	constructor(repository) {
+		this.repository = repository
+	}
 
 
-    #checkCredentialsFormat(user){
-        const validations = user.validateCreds()
+	#checkCredentialsFormat(user) {
+		const validations = user.validateCreds()
 
-        for (
-            const [field, valid] of 
-            Object.entries(validations)
-        ){
-            if (!valid) throw Error(
-                "Invalid credentials format", 
-                { 'cause': {
-                    'type': "credFormat",
-                    'field': field
-                } }
-            )
-        }
-    }
+		for (
+			const [field, valid] of
+			Object.entries(validations)
+		) {
+			if (!valid) throw Error(
+				"Invalid credentials format",
+				{
+					'cause': {
+						'type': "credFormat",
+						'field': field
+					}
+				}
+			)
+		}
+	}
 
-    async #checkEmailExists(email){
-        const user = await this.repository.selectAccountByEmail(email)
-        if (user.length === 0) return null
+	async #checkEmailExists(email) {
+		const user = 
+		await this.repository.selectAccountByEmail(email)
+		if (user.length === 0) return null
 
-        return user[0]
-    }
+		return user[0]
+	}
 
-    #generateAccessToken(userId, userRole){
-        return jwt.sign({ 'sub': userId, 'role': userRole },
-            process.env.TOKEN_SECRET,
-            {
-                'header': { 'typ': "JWT" },
-                'issuer': process.env.TOKEN_ISSUER,
-                'expiresIn': Number(process.env.ACCESS_TOKEN_EXP)
-            }
-        )   
-    }
+	/**
+	 * 
+	 * @param {string} userId 
+	 * @param {"user" | "admin"} userRole 
+	 * @returns {string}
+	 */
+	#generateAccessToken(userId, userRole) {
+		return jwt.sign({ 'sub': userId, 'role': userRole },
+			process.env.TOKEN_SECRET,
+			{
+				'header': { 'typ': "JWT" },
+				'issuer': process.env.TOKEN_ISSUER,
+				'expiresIn': Number(process.env.ACCESS_TOKEN_EXP)
+			}
+		)
+	}
 
-    async registerAccount(email, password){
-        // 1. Check data formats
-        const user = new User(email, password)
+	/**
+	 * 
+	 * @param {string} token
+	 * @returns {{
+	 * 	"sub": string, "role": string,
+	 * 	"iat": number, "exp": number,
+	 * 	"iss": string
+	 * } | null}
+	 */
+	validateToken(token){
+		try {
+			const credsData = jwt.verify(token);
 
-        this.#checkCredentialsFormat(user)
+			return credsData
 
-        // 2. Check if email alredy exists
-        let userRaw = await this.#checkEmailExists(user.email)
-        if (userRaw){
-            throw Error("Email alredy exists", {
-                'cause': { 'type': "emailExists" }
-            })
-        }
-        
-        // 3. do register query into data base
-        user.hashPassword()
-        userRaw = await this.repository.insertAccount(user)
+		} catch(error){
+			return null
+		}
+	}
 
-        // 4. return access token
-        const accessToken = this.#generateAccessToken(
-            userRaw.id, userRaw.role
-        )
+	async registerAccount(email, password) {
+		// 1. Check data formats
+		const user = new User(email, password)
 
-        return accessToken
-    }
+		this.#checkCredentialsFormat(user)
 
-    async accessAccount(email, password){
-        // 1. Check data formats
-        const user = new User(email, password)
+		// 2. Check if email alredy exists
+		let userRaw = 
+		await this.#checkEmailExists(user.email)
+		if (userRaw) {
+			throw Error("Email alredy exists", {
+				'cause': { 'type': "emailExists" }
+			})
+		}
 
-        this.#checkCredentialsFormat(user)
+		// 3. do register query into data base
+		user.hashPassword()
+		userRaw = 
+		await this.repository.insertAccount(user)
 
-        // 2. Validate both credentials
-        const userRaw = await this.#checkEmailExists(user.email)
+		// 4. return access token
+		const accessToken = this.#generateAccessToken(
+			userRaw.id, userRaw.role
+		)
 
-        if (!(
-            userRaw && 
-            User.comparePassword(password, userRaw.password)
-        )){
-            throw Error("Invalid credentials", {
-                'cause': { 'type': "invalidCreds" }
-            })
-        }
+		return accessToken
+	}
 
-        // 3. return access token
-        const accessToken = this.#generateAccessToken(
-            userRaw.id, userRaw.role
-        )
+	async accessAccount(email, password) {
+		// 1. Check data formats
+		const user = new User(email, password)
 
-        return accessToken
-    }
+		this.#checkCredentialsFormat(user)
+
+		// 2. Validate both credentials
+		const userRaw = 
+		await this.#checkEmailExists(user.email)
+
+		if (!(
+			userRaw &&
+			User.comparePassword(password, userRaw.password)
+		)) {
+			throw Error("Invalid credentials", {
+				'cause': { 'type': "invalidCreds" }
+			})
+		}
+
+		// 3. return access token
+		const accessToken = this.#generateAccessToken(
+			userRaw.id, userRaw.role
+		)
+
+		return accessToken
+	}
 }
