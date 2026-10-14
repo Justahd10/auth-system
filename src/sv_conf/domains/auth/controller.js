@@ -1,6 +1,5 @@
-// Helpers
-import ClientSideError from "../../exceptions/ClientSideError.js"
-import { resolveResponse, resolveError, setAuthCookie } from "../../utils.js"
+import { UnauthorizedError } from "../../exceptions/ClientSideError.js"
+import { resolveResponse, setAuthCookie } from "../../utils.js"
 
 
 
@@ -15,89 +14,74 @@ export default class AuthController {
 
 	/**
 	 * @param {import('express').Request} req 
-	 * @param {import('express').Response} res 
+	 * @param {import('express').Response} res
+	 * @param {import('express').NextFunction} 
 	 */
-	async handleRegister(req, res) {
-		// 1. Try create account
+	async handleRegister(req, res, next) {
 		try {
+			// 1. Try register account
 			const accessToken = 
 			await this.service.registerAccount(
 				req.body.email, req.body.password
-			)
+			);
 
 			// 2. Prepare credentials
-			setAuthCookie("access_token", res, accessToken)
+			setAuthCookie("acess", res, accessToken);
 
 			return resolveResponse({
 				'res': res,
 				'type': "success",
 				'status': 200
-			})
-
-		} catch (error) {
-			// 3. Response error
-			const errFormat = resolveError(error);
-
-			return resolveResponse({
-				'res': res,
-				'type': "success",
-				'values': errFormat
-			})
-		}
+			});
+		} catch(err){ next(err) }
 	}
 
 	/**
 	 * @param {import('express').Request} req 
 	 * @param {import('express').Response} res 
+	 * @param {import('express').NextFunction} next
 	 */
-	async handleLogin(req, res) {
-		// 1. Try access account data
+	async handleLogin(req, res, next) {
 		try {
+			// 1. Try access account data
 			const accessToken = 
 			await this.service.accessAccount(
 				req.body.email, req.body.password
 			)
 
 			// 2. Prepare credentials
-			setAuthCookie("access_token", res, accessToken)
+			setAuthCookie("acess", res, accessToken)
 
 			return resolveResponse({
 				'res': res,
 				'type': "success",
 				'status': 200
 			})
-
-		} catch (error) {
-			// 3. Error response
-			const errFormat = resolveError(error)
-			
-			return resolveResponse({
-				'res': res,
-				'type': "error",
-				'values': errFormat
-			})
-		}
+		} catch(err){ next(err) }
 	}
 
 	/**
 	 * @param {import('express').Request} req 
-	 * @param {import('express').Response} res 
+	 * @param {import('express').Response} res
+	 * @param {import('express').NextFunction} next 
 	 */
-	handleAuthDetails(req, res) {
+	handleAuthDetails(req, res, next) {
 		try {
-			// 1. Check cookie value
+			// 1. Check crendetials cookie
 			const accessToken = req.cookies.accessToken;
 
 			if (!accessToken){
-				throw ClientSideError("NO_AUTHENTICATION");
+				throw new UnauthorizedError({
+					'errCode': "NO_AUTHENTICATION"
+				});
 			}
 
-			// 2. Check validation
+			// 2. Check credentials content
 			const authDetails = 
 			this.service.validateToken(accessToken);
 
 			return resolveResponse({
-				'response': res,
+				'res': res,
 				'type': "success",
 				'status': 200,
 				'values': {
@@ -105,14 +89,6 @@ export default class AuthController {
 					'role': authDetails.role
 				}
 			});
-		} catch(error){
-			const errFormat = resolveError(error);
-
-			return resolveResponse({
-				'res': res,
-				'type': "error",
-				'values': errFormat
-			})
-		}
+		} catch(err){ next(err) }
 	}
 }
