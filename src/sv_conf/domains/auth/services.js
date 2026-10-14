@@ -1,6 +1,6 @@
-import ClientSideError from "../../exceptions/ClientSideError.js";
+import { UnauthorizedError, UnprocessableEntity } from "../../exceptions/ClientSideError.js";
 import User from "./model.js";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
 
 
@@ -24,9 +24,10 @@ export default class AuthService {
 			const [field, valid] of
 			Object.entries(validations)
 		) {
-			if (!valid) throw new ClientSideError(
-				"INVALID_CREDENTIALS", [field]
-			)
+			if (!valid) throw new UnauthorizedError({
+				'errCode': "INVALID_CREDENTIALS",
+				'errItems': [field]
+			})
 		}
 	}
 
@@ -71,7 +72,9 @@ export default class AuthService {
 			return credsData
 
 		} catch(error){
-			throw new ClientSideError("NO_AUTHENTICATION")
+			throw new UnauthorizedError({
+				'errCode': "NO_AUTHENTICATION",
+			})
 		}
 	}
 
@@ -84,7 +87,9 @@ export default class AuthService {
 		// 2. Check if email alredy exists
 		let userRaw = 
 		await this.#checkEmailExists(user.email)
-		if (userRaw) throw new ClientSideError("EMAIL_CONFLICT");
+		if (userRaw) throw new UnprocessableEntity({
+			'errCode': "EMAIL_CONFLICT"
+		})
 
 		// 3. do register query into data base
 		user.hashPassword()
@@ -113,7 +118,9 @@ export default class AuthService {
 			userRaw &&
 			User.comparePassword(password, userRaw.password)
 		)) {
-			throw new ClientSideError("INVALID_CREDENTIALS");
+			throw new UnauthorizedError({
+				'errCode': "INVALID_CREDENTIALS"
+			})
 		}
 
 		// 3. return access token
