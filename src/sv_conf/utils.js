@@ -36,24 +36,6 @@ export function resolveResponse({
   );
 }
 
-/**
- * @param {Error | import('./exceptions/ClientSideError').default} err 
- */
-export function resolveError(err){
-  if (err.name !== "ClientSideError"){
-    return {
-      'status': 500,
-      'code': "INTERNAL_ERROR"
-    }
-  };
-
-  return {
-    'type': err.type,
-    'status': err.status,
-    'code': err.errorCode,
-    'errors': err.errItems
-  }
-}
 
 /**
  * @param {"access" | "refres"} type 
