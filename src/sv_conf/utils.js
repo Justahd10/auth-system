@@ -1,55 +1,58 @@
 /**
- * @param {number} statusCode 
- * @param {import('express').Response} res 
- * @returns 
+ * @typedef {object} ResponseResolverInterface
+ * @property {import('express').Response} res
+ * @property {"success" | "error"} type
+ * @property {number} status
+ * @property {object | null} values
  */
-export function returnRes(statusCode, res) {
-  return res.status(statusCode).json(res.locals.payload)
-}
-
-
 
 /**
- * @param {{
- *  "type": "success" | "error",
- *  "response": import('express').Response,
- *  "values": object
- * }} param0 
+ * @param {ResponseResolverInterface} param0
  */
-export function prepareResponse({ type = "success", response, values }) {
-  switch (type) {
-    case "error":
-      response.locals.payload.status = "unsuccessful";
-      response.locals.payload.error = values.error;
-      break;
+export function resolveResponse({
+  res, type = "success", status = 200, values = null })
+  {
+    switch(type){
+      
+      // values as error format
+      case "error":
+        res.locals.payload.status = "unsuccessful";
+        res.locals.payload.error = values;
 
-    case "success":
-      if (values) {
-        response.locals.payload.data = {
-          ...response.locals.payload.data,
+        return res.status(values.status).json(
+          res.locals.payload
+        );
+
+      // values as data
+      case "success":
+        res.locals.payload.data ={
+          ...res.locals.payload.data,
           ...values
         }
-        break;
-      }
-  }
+    };
+
+  return res.status(status).json(
+    res.locals.payload
+  );
 }
 
 /**
- * 
- * @param {string} errorCode 
- * @param {Object} errorsMap
- * @param {import('express').Response} res
- * @returns {import('express').Response}
+ * @param {Error | import('./exceptions/ClientSideError').default} err 
  */
-export function resolveErrorResponse(errorCode, errorsMap, res) {
-  prepareResponse({
-    'type': "error",
-    'response': res,
-    'values': { 'error': err.message }
-  });
+export function resolveError(err){
+  if (err.name !== "ClientSideError"){
+    return {
+      'status': 500,
+      'code': "INTERNAL_ERROR"
+    }
+  };
 
-  const statusCode = errorsMap[errorCode] ?? 500;
-  return res.status(statusCode).json(res.locals.payload);
+  return {
+    'type': err.type,
+    'status': err.status,
+    'code': err.errorCode,
+    'errors': err.errItems
+  }
 }
 
 /**

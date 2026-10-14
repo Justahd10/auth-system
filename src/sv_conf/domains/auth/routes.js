@@ -2,7 +2,6 @@
 
 
 /**
- * 
  * @param {import('express').Application} app
  * @param {import('./controller').default} controller 
  */

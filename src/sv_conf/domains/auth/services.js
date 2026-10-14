@@ -1,3 +1,4 @@
+import ClientSideError from "../../exceptions/ClientSideError.js";
 import User from "./model.js";
 import jwt from "jsonwebtoken"
 
@@ -13,6 +14,9 @@ export default class AuthService {
 	}
 
 
+	/**
+	 * @param {User} user 
+	 */
 	#checkCredentialsFormat(user) {
 		const validations = user.validateCreds()
 
@@ -20,14 +24,8 @@ export default class AuthService {
 			const [field, valid] of
 			Object.entries(validations)
 		) {
-			if (!valid) throw Error(
-				"Invalid credentials format",
-				{
-					'cause': {
-						'type': "credFormat",
-						'field': field
-					}
-				}
+			if (!valid) throw new ClientSideError(
+				"INVALID_CREDENTIALS", [field]
 			)
 		}
 	}
@@ -73,24 +71,20 @@ export default class AuthService {
 			return credsData
 
 		} catch(error){
-			return null
+			throw new ClientSideError("NO_AUTHENTICATION")
 		}
 	}
 
 	async registerAccount(email, password) {
 		// 1. Check data formats
-		const user = new User(email, password)
+		const user = new (email, password)
 
 		this.#checkCredentialsFormat(user)
 
 		// 2. Check if email alredy exists
 		let userRaw = 
 		await this.#checkEmailExists(user.email)
-		if (userRaw) {
-			throw Error("Email alredy exists", {
-				'cause': { 'type': "emailExists" }
-			})
-		}
+		if (userRaw) throw new ClientSideError("EMAIL_CONFLICT");
 
 		// 3. do register query into data base
 		user.hashPassword()
@@ -119,9 +113,7 @@ export default class AuthService {
 			userRaw &&
 			User.comparePassword(password, userRaw.password)
 		)) {
-			throw Error("Invalid credentials", {
-				'cause': { 'type': "invalidCreds" }
-			})
+			throw new ClientSideError("INVALID_CREDENTIALS");
 		}
 
 		// 3. return access token

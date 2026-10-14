@@ -1,13 +1,16 @@
-import { prepareResponse } from "../utils.js";
+import ClientSideError from '../exceptions/ClientSideError.js'
 
 
 
 /**
+ * @typedef {string} IpAddress
+ */
+
+/**
  * Validate rate limit for each request
- * @param {Request} req 
- * @param {Response} res 
- * @param {Function} next
- * 
+ * @param {import('express').Request} req 
+ * @param {import('express').Response} res 
+ * @param {import('express').NextFunction} next
  * @example
  * // Example of rate limit memory structure
     const ratemapper ={
@@ -30,16 +33,25 @@ class RateLimit{
         ).toFixed(1)
     }
 
+    /**
+     * @param {IpAddress} ip 
+     */
     #appendCounter(ip){
         const origin = this.#ratemapper[ip];
         origin.totalAccess = origin.totalAccess + 1;
     }
 
+    /**
+     * @param {IpAddress} ip 
+     */
     #resetCounter(ip){
         const origin = this.#ratemapper[ip];
         origin.totalAccess = 0;
     }
 
+    /**
+     * @param {IpAddress} ip 
+     */
     #getOrigin(ip){
         let origin = this.#ratemapper[ip];
 
@@ -53,6 +65,9 @@ class RateLimit{
         return origin
     }
 
+    /**
+     * @param {IpAddress} ip 
+     */
     verifyAccessLimit(ip){
         const origin = this.#getOrigin(ip);
         
@@ -75,19 +90,16 @@ class RateLimit{
 
 const rateLimit = new RateLimit()
 
-
+/**
+ * @param {import('express').Request} req 
+ * @param {import('express').Response} res 
+ * @param {import('express').NextFunction} next 
+ */
 export default function validateRateLimit(req, res, next){
     // Access IP of the origin device
     // and verify the rate limiit
     if (!rateLimit.verifyAccessLimit(req.ip)){
-        // return Too Many Request
-        prepareResponse({
-            'response': res,
-            'type': "error",
-            'values': {'error': "Too many requests"},
-        })
-
-        return res.status(429).json(res.locals.payload)
+        throw ClientSideError('MANY_REQUESTS')
     }
 
     next()

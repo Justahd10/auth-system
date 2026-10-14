@@ -1,20 +1,12 @@
 // Helpers
-import {
-	resolveErrorResponse, returnRes, 
-	prepareResponse, setAuthCookie
-} from "../../utils.js"
+import ClientSideError from "../../exceptions/ClientSideError.js"
+import { resolveResponse, resolveError, setAuthCookie } from "../../utils.js"
 
 
 
 export default class AuthController {
-	static Errors = {
-		'credFormat': 422,
-		'emailExists': 409,
-		'invalidCreds': 401
-	}
 
 	/**
-	 * 
 	 * @param {import('./services.js').default} service 
 	 */
 	constructor(service) {
@@ -22,7 +14,6 @@ export default class AuthController {
 	}
 
 	/**
-	 * 
 	 * @param {import('express').Request} req 
 	 * @param {import('express').Response} res 
 	 */
@@ -37,16 +28,25 @@ export default class AuthController {
 			// 2. Prepare credentials
 			setAuthCookie("access_token", res, accessToken)
 
-			return returnRes(200, res)
+			return resolveResponse({
+				'res': res,
+				'type': "success",
+				'status': 200
+			})
 
 		} catch (error) {
 			// 3. Response error
+			const errFormat = resolveError(error);
 
+			return resolveResponse({
+				'res': res,
+				'type': "success",
+				'values': errFormat
+			})
 		}
 	}
 
 	/**
-	 * 
 	 * @param {import('express').Request} req 
 	 * @param {import('express').Response} res 
 	 */
@@ -61,44 +61,58 @@ export default class AuthController {
 			// 2. Prepare credentials
 			setAuthCookie("access_token", res, accessToken)
 
-			return returnRes(200, res)
+			return resolveResponse({
+				'res': res,
+				'type': "success",
+				'status': 200
+			})
 
 		} catch (error) {
 			// 3. Error response
-
+			const errFormat = resolveError(error)
+			
+			return resolveResponse({
+				'res': res,
+				'type': "error",
+				'values': errFormat
+			})
 		}
 	}
 
 	/**
-	 * 
 	 * @param {import('express').Request} req 
 	 * @param {import('express').Response} res 
 	 */
 	handleAuthDetails(req, res) {
-		// 1. Check cookie value
-		const accessToken = req.cookies.accessToken;
+		try {
+			// 1. Check cookie value
+			const accessToken = req.cookies.accessToken;
 
-		if (accessToken){
+			if (!accessToken){
+				throw ClientSideError("NO_AUTHENTICATION");
+			}
+
 			// 2. Check validation
 			const authDetails = 
 			this.service.validateToken(accessToken);
 
-			if (authDetails){
-				prepareResponse({
-					'response': res,
-					'type': "success",
-					'values': {
-						'authenticated': true,
-						'role': credsDetails.role
-					}
-				})
+			return resolveResponse({
+				'response': res,
+				'type': "success",
+				'status': 200,
+				'values': {
+					'authenticated': true,
+					'role': authDetails.role
+				}
+			});
+		} catch(error){
+			const errFormat = resolveError(error);
 
-				return res.status(200).json(
-					res.locals.payload
-				)
-			}
+			return resolveResponse({
+				'res': res,
+				'type': "error",
+				'values': errFormat
+			})
 		}
-		
-		// 3. Error response
 	}
 }

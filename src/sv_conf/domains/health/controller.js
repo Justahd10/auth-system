@@ -1,27 +1,28 @@
 // Helpers
-import { prepareResponse } from "../../utils.js"
+import { resolveResponse } from "../../utils.js"
 
 
 
-export default class HealthController{
-    
-    /**
-     * @param {import('./services.js').default} service 
-     */
-    constructor(service){
-        this.service = service
-    }
+export default class HealthController {
 
-    /** 
-     * @param {import('express').Response} res 
-     */
-    testResponse(res){
-        const testData = this.service.setEchoResponse()
-        
-        prepareResponse({
-            'response': res, 'values': testData
-        })
+  /**
+   * @param {import('./services.js').default} service 
+   */
+  constructor(service) {
+    this.service = service
+  }
 
-        res.status(200).json(res.locals.payload)
-    }
+  /** 
+   * @param {import('express').Response} res 
+   */
+  testResponse(res) {
+    const testData = this.service.setEchoResponse()
+
+    return resolveResponse({
+      'res': res,
+      'type': "success",
+      'status': 200,
+      'values': testData
+    })
+  }
 }
