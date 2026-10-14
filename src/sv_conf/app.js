@@ -1,6 +1,3 @@
-/*
-        Backend building
-*/
 import getDefaultMiddlewares from "./middlewares/default.js";
 
 import cookieParser from "cookie-parser";
@@ -13,19 +10,28 @@ import express from "express";
 
 const app = express();
 
-// extensions middlewares
+/*
+    Extensions middlewars
+*/
 app.use(cors({
-    'origin': process.env.FRONTEND_SERVER,
-    'credentials': true
+  'origin': process.env.FRONTEND_SERVER,
+  'credentials': true
 }))
 app.use(cookieParser());
-app.use(cookieSession());
+app.use(cookieSession({
+    'name': 'session',
+    'signed': false
+}));
 
-// Native middlewares
+/*
+    Native middlewares
+*/
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Application level middlewares for
+/*
+    Application level middlewares
+*/
 app.use(getDefaultMiddlewares());
 
 export default app
