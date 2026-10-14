@@ -1,43 +1,56 @@
-export default class UserRepository{
-    constructor(db){
-        this.db = db
-    }
+export default class UserRepository {
+  
+  /**
+   * @param {import('pg-promise').IDatabase<any>} db 
+   */
+  constructor(db) {
+    this.db = db
+  }
 
 
-    // Basic query
-    async selectUsers(){
-        this.db.any()
-    }
+  // Basic query
+  async selectUsers() {
+    this.db.any()
+  }
 
-    async insertAccount(userData){
-        const INSERT = `INSERT INTO users("email", "password")`;
-        const VALUES = ` VALUES ($1, $2) RETURNING id, role;`;
+  /**
+   * @param {import('./model.js').default} userData 
+   */
+  async insertAccount(userData) {
+    const INSERT = `INSERT INTO users("email", "password")`;
+    const VALUES = ` VALUES ($1, $2) RETURNING id, role;`;
 
-        const userRaw = await this.db.query(INSERT + VALUES, 
-            [userData.email, userData.password]
-        );
+    const userRaw = await this.db.query(INSERT + VALUES,
+      [userData.email, userData.password]
+    );
 
-        return userRaw[0]
-    }
+    return userRaw[0]
+  }
 
-    async updateAccount(){
-        this.db.any()
-    }
+  async updateAccount() {
+    this.db.any()
+  }
 
-    async dropAccount(){
-        this.db.any()
-    }
+  async dropAccount() {
+    this.db.any()
+  }
 
 
-    // Specif querys
-    async selectAccountByEmail(authEmail){
-        const SELECT = `SELECT * FROM users`;
-        const WHERE = ` WHERE email = $1;`;
+  /*
+      Specif querys
+  */
 
-        const userRaw = await this.db.query(SELECT + WHERE,
-            [authEmail]
-        );
-        
-        return userRaw
-    }
+  /**
+   * @param {string} authEmail 
+   */
+  async selectAccountByEmail(authEmail) {
+    const SELECT = `SELECT * FROM users`;
+    const WHERE = ` WHERE email = $1;`;
+
+    const userRaw = await this.db.query(SELECT + WHERE,
+      [authEmail]
+    );
+
+    return userRaw
+  }
 }
