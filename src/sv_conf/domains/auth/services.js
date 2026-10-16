@@ -39,6 +39,10 @@ export default class AuthService {
 		return user[0]
 	}
 
+	/*
+			Crendentials token operations
+	*/
+
 	/**
 	 * 
 	 * @param {string} userId 
@@ -78,6 +82,40 @@ export default class AuthService {
 		}
 	}
 
+	/*
+			Email confirmation services
+	*/
+	/**
+	 * @typedef {string} sessionToken
+	 */
+
+	/**
+	 * @param {string} email
+	 * @returns {sessionToken}
+	 */
+	generateEmailConfirmToken(email){
+
+	}
+
+	/**
+	 * @returns {string}
+	 */
+	generateEmailConfirmCode(){
+
+	}
+
+	/**
+	 * @param {string} email 
+	 */
+	sendEmailConfirmationMessage(email){
+
+	}
+
+	/**
+	 * @param {string} email 
+	 * @param {string} password 
+	 * @returns {sessionToken}
+	 */
 	async registerAccount(email, password) {
 		// 1. Check data formats
 		const user = new (email, password)
@@ -91,17 +129,14 @@ export default class AuthService {
 			'errCode': "EMAIL_CONFLICT"
 		})
 
-		// 3. do register query into data base
-		user.hashPassword()
-		userRaw = 
-		await this.repository.insertAccount(user)
+		// 3. create session token
+		
 
-		// 4. return access token
-		const accessToken = this.#generateAccessToken(
-			userRaw.id, userRaw.role
-		)
+		// 4. Store data in Redis
 
-		return accessToken
+
+		// 5. return session token
+		return 
 	}
 
 	async accessAccount(email, password) {

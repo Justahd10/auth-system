@@ -10,4 +10,17 @@ export default function setAuthRoutes(app, controller){
   app.post("/api/auth/register", (req, res)=> controller.handleRegister(req, res));
   app.post("/api/auth/login", (req, res)=> controller.handleLogin(req, res));
   app.get("/api/auth/me", (req, res)=> controller.handleAuthDetails(req, res));
+  
+  /* app.post(
+    "/api/auth/email/:sessionToken/verify", 
+    (req, res)=> controller.handleEmailConfirmation
+  ) */
+  /* app.post(
+    "/api/auth/email/:sessionToken/resend", 
+    (req, res)=> controller.handleEmailConfirmation
+  ) */
+  /* app.post(
+    "/api/auth/email/:sessionToken/confirm", 
+    (req, res)=> controller.handleEmailConfirmation
+  ) */
 }
