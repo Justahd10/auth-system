@@ -1,6 +1,11 @@
+// Exceptions handling
 import { UnauthorizedError, UnprocessableEntity } from "../../exceptions/ClientSideError.js";
+// Data model
 import User from "./model.js";
+// Authentication credentials
 import jwt from "jsonwebtoken";
+// Redis operations
+import { setKeyValue, getKeyValue, delKey } from "../../../redis_conf/querys.js";
 
 
 
