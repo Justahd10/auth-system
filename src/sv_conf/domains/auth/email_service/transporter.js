@@ -12,6 +12,17 @@ export const transporter = nodemailer.createTransport({
   }
 })
 
+// Check email service
+export async function testEmailConnection(){
+  try {
+    await transporter.verify()
+    console.log("Email service sucessful started.")
+
+  } catch(error){
+    console.error("Email service verification failsed:", error)
+  }
+}
+
 // Messages setting
 const defaultValues ={
   'mailConfirm': {
