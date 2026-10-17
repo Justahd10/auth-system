@@ -6,7 +6,9 @@ import { createClient } from "redis";
     Client setting
 */
 export const redisClient = createClient({
-  'url': process.env.REDIS_URL
+  'url': process.env.REDIS_URL,
+  'username': process.env.REDIS_USER,
+  'password': process.env.REDIS_PASSWORD
 });
 
 /*
@@ -16,7 +18,7 @@ redisClient.on('ready', ()=>{
   console.log("Redis connection created.")
 })
 redisClient.on('error', (err)=>{
-  console.log("Error: redis exception:", err)
+  console.error("Error: redis exception:", err)
 })
 redisClient.on('end', ()=>{
   console.log("Redis connection fineshed")
