@@ -1,9 +1,12 @@
 // Exceptions handling
 import { UnauthorizedError, UnprocessableEntity } from "../../exceptions/ClientSideError.js";
+import ServerSideError from "../../exceptions/ServerSideError.js";
 // Data model
 import User from "./model.js";
 // Authentication credentials
 import jwt from "jsonwebtoken";
+// Email service
+import { sendMail } from "./email_service/transporter.js";
 // Redis operations
 import { setKeyValue, getKeyValue, delKey } from "../../../redis_conf/querys.js";
 
@@ -37,8 +40,8 @@ export default class AuthService {
 	}
 
 	async #checkEmailExists(email) {
-		const user = 
-		await this.repository.selectAccountByEmail(email)
+		const user =
+			await this.repository.selectAccountByEmail(email)
 		if (user.length === 0) return null
 
 		return user[0]
@@ -74,13 +77,13 @@ export default class AuthService {
 	 * 	"iss": string
 	 * } | null}
 	 */
-	validateToken(token){
+	validateToken(token) {
 		try {
 			const credsData = jwt.verify(token);
 
 			return credsData
 
-		} catch(error){
+		} catch (error) {
 			throw new UnauthorizedError({
 				'errCode': "NO_AUTHENTICATION",
 			})
@@ -91,35 +94,54 @@ export default class AuthService {
 			Email confirmation services
 	*/
 	/**
-	 * @typedef {string} sessionToken
+	 * @typedef {string} mailConfirmToken
 	 */
 
 	/**
-	 * @param {string} email
-	 * @returns {sessionToken}
+	 * @returns {mailConfirmToken}
 	 */
-	generateEmailConfirmToken(email){
+	#generateEmailConfirmToken() {
+		// Start token value
+    let token = "";
 
+    const chars = process.env.TOKEN_CHARS;
+
+		// Build token value
+    for (let i = 0; i < length; i++){
+        const i = crypto.randomInt(0, chars.length);
+        token = token + chars[i];
+    }
+
+    return token
 	}
 
 	/**
 	 * @returns {string}
 	 */
-	generateEmailConfirmCode(){
+	#generateEmailConfirmCode() {
+		// Start initial code value
+		let code = "";
+		const digits = [
+			"0", "1", "2", "3", "4",
+			"5", "6", "7", "8", "9",
+		];
 
-	}
+		// Build code with quantity number
+		for (let i = 0; i < quantity; i++) {
+			const value = digits[Math.floor(
+				Math.random() * digits.length
+			)]
 
-	/**
-	 * @param {string} email 
-	 */
-	sendEmailConfirmationMessage(email){
+			code = code + value;
+		};
 
+		return code
 	}
 
 	/**
 	 * @param {string} email 
 	 * @param {string} password 
-	 * @returns {sessionToken}
+	 * @returns {Promise<mailConfirmToken>}
 	 */
 	async registerAccount(email, password) {
 		// 1. Check data formats
@@ -128,20 +150,34 @@ export default class AuthService {
 		this.#checkCredentialsFormat(user)
 
 		// 2. Check if email alredy exists
-		let userRaw = 
-		await this.#checkEmailExists(user.email)
+		let userRaw =
+			await this.#checkEmailExists(user.email)
 		if (userRaw) throw new UnprocessableEntity({
 			'errCode': "EMAIL_CONFLICT"
 		})
 
-		// 3. create session token
-		
+		// 3. create token and confirmation code
+		const code = this.#generateEmailConfirmCode();
 
-		// 4. Store data in Redis
+		// 4. Try send email message
+		try { sendMail(email, "mailConfirm", {
+			'html': {
+				'confirmCode': code
+			}
+		}) } catch (error){
+			throw new ServerSideError({
+				'errCode': "EMAIL_SEND_FAILED"
+			})
+		};
 
+		// 4. Create token and Store data
+		const token = this.#generateEmailConfirmToken(email);
+
+		await setKeyValue(`email_confirm:${token}`, email, 300);
+		await setKeyValue(`email_code:${token}`, code, 40);
 
 		// 5. return session token
-		return 
+		return token
 	}
 
 	async accessAccount(email, password) {
@@ -151,8 +187,8 @@ export default class AuthService {
 		this.#checkCredentialsFormat(user)
 
 		// 2. Validate both credentials
-		const userRaw = 
-		await this.#checkEmailExists(user.email)
+		const userRaw =
+			await this.#checkEmailExists(user.email)
 
 		if (!(
 			userRaw &&
