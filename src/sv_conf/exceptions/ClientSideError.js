@@ -1,6 +1,7 @@
-import { resolveResponse } from '../utils.js';
-
-
+const errCodes = [
+  "INVALID_CREDENTIALS", "NO_AUTHENTICATION",
+  "EMAIL_CONFLICT", "TOO_MANY_REQUESTS"
+]
 
 /*
     Errors url description mapping
@@ -88,46 +89,4 @@ export class ManyRequestsError extends ClientSideError{
     this.status = 429;
     this.type = errorsDesc[429];
   }
-}
-
-/*
-    Errors handling - middleware 
-*/
-
-/**
- * @param {Error | {
- *  'errCode': string,
- *  'errItems': array,
- *  'status': keyof typeof errorsDesc
- * }} err 
- * @param {import('express').Request} req 
- * @param {import('express').Response} res 
- * @param {import('express').NextFunction} next 
- */
-export function handleError(err, req, res, next){
-  if (err.name !== "ClientSideError"){
-    return resolveResponse({
-      'res': res,
-      'type': "error",
-      'status': 500,
-      'values': {
-        'type': errorsDesc[500],
-        'status': 500,
-        'code': "SERVER_ERROR",
-        'errors': null
-      }
-    })
-  }
-
-  return resolveResponse({
-    'res': res,
-    'type': "error",
-    'status': err.status,
-    'values': {
-      'type': errorsDesc[err.status],
-      'status': err.status,
-      'code': err.message,
-      'errors': err.errItems ?? null
-    }
-  })
 }
