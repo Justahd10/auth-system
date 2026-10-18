@@ -10,6 +10,12 @@ import express from "express";
 
 const app = express();
 
+
+/*
+    Application level middlewares
+*/
+app.use(getDefaultMiddlewares());
+
 /*
     Extensions middlewars
 */
@@ -29,9 +35,7 @@ app.use(cookieSession({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/*
-    Application level middlewares
-*/
-app.use(getDefaultMiddlewares());
+app.set('json spaces', 2);
+
 
 export default app
