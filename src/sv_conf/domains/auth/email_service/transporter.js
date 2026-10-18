@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import templates from "./templates/templates";
+import templates from "./templates/templates.js";
 
 
 
@@ -42,7 +42,7 @@ const defaultValues ={
  * @param {keyof typeof messages} type
  * @param {EmailMessageValues} values
  */
-export function sendMail(to, type, values){
+export async function sendMail(to, type, values){
   // Set default values
   let msgFormat = defaultValues[type];
   msgFormat.to = to;
@@ -57,5 +57,5 @@ export function sendMail(to, type, values){
   }
 
   // Try send mail message
-  transporter.sendMail(msgFormat)
+  await transporter.sendMail(msgFormat)
 }
