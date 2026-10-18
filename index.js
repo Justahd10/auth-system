@@ -6,13 +6,13 @@ import setAuthDomain from "./src/sv_conf/domains/auth/config.js";
 // Email service
 import { testEmailConnection } from "./src/sv_conf/domains/auth/email_service/transporter.js";
 // Exception handling
-import { handleError } from "./src/sv_conf/exceptions/ClientSideError.js";
+import handleError from "./src/sv_conf/exceptions/handler.js";
 // Server
 import app from "./src/sv_conf/app.js";
 // Postgres data base
 import db from "./src/db_conf/db.js";
 // Redis data base
-import { redisQuit, redisConnect } from "./src/redis_conf/config.js";
+import { redisQuit, redisConnect } from "./src/redis_conf/redis-client.js";
 
 
 
@@ -39,12 +39,16 @@ app.use(handleError);
     Server run
 */
 const port = process.env.PORT;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Authentication server running. Listening on port ${port}`)
 });
 
 /*
     Closing sign handling
 */
-process.on("SIGTERM", async ()=> await redisQuit());
-process.on("SIGINT", async ()=> await redisQuit());
+process.on("SIGTERM", async ()=>{
+  console.log("SIGTERM signal received. Closing HTTP Server")
+  server.close();
+
+  await redisQuit();
+});
