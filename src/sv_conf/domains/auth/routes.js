@@ -7,9 +7,18 @@
  * @param {import('./controller').default} controller 
  */
 export default function setAuthRoutes(app, controller){
-  app.post("/api/auth/register", (req, res)=> controller.handleRegister(req, res));
-  app.post("/api/auth/login", (req, res)=> controller.handleLogin(req, res));
-  app.get("/api/auth/me", (req, res)=> controller.handleAuthDetails(req, res));
+  app.post(
+    "/api/auth/register", 
+    (req, res, next)=> controller.handleRegister(req, res, next)
+  );
+  app.post(
+    "/api/auth/login", 
+    (req, res, next)=> controller.handleLogin(req, res, next)
+  );
+  app.get(
+    "/api/auth/me", 
+    (req, res, next)=> controller.handleAuthDetails(req, res, next)
+  );
   
   /* app.post(
     "/api/auth/email/:sessionToken/verify", 

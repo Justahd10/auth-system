@@ -8,11 +8,6 @@ export default class UserRepository {
   }
 
 
-  // Basic query
-  async selectUsers() {
-    this.db.any()
-  }
-
   /**
    * @param {import('./model.js').default} userData 
    */
@@ -27,14 +22,6 @@ export default class UserRepository {
     return userRaw[0]
   }
 
-  async updateAccount() {
-    this.db.any()
-  }
-
-  async dropAccount() {
-    this.db.any()
-  }
-
 
   /*
       Specif querys
@@ -43,7 +30,7 @@ export default class UserRepository {
   /**
    * @param {string} authEmail 
    */
-  async selectAccountByEmail(authEmail) {
+  async selectAccountByMail(authEmail) {
     const SELECT = `SELECT * FROM users`;
     const WHERE = ` WHERE email = $1;`;
 

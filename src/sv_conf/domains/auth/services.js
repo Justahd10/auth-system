@@ -1,14 +1,16 @@
-// Exceptions handling
-import { UnauthorizedError, UnprocessableEntity } from "../../exceptions/ClientSideError.js";
-import ServerSideError from "../../exceptions/ServerSideError.js";
-// Data model
-import User from "./model.js";
-// Authentication credentials
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
-// Email service
-import { sendMail } from "./email_service/transporter.js";
-// Redis operations
-import { setKeyValue, getKeyValue, delKey } from "../../../redis_conf/querys.js";
+import {
+	UnauthorizedError,
+	UnprocessableEntity
+} from "../../exceptions/ClientSideError.js";
+import User from "./model.js";
+import { sendMailConfirmMsg } from "./email_service/messages.js";
+import {
+	setKeyValue,
+	getKeyValue,
+	delKey
+} from "../../../redis_conf/querys.js";
 
 
 
@@ -23,36 +25,64 @@ export default class AuthService {
 
 
 	/**
-	 * @param {User} user 
+	 * @param {string} email 
+	 * @returns {Promise<object | null>}
 	 */
-	#checkCredentialsFormat(user) {
-		const validations = user.validateCreds()
+	async #checkMailExists(email) {
+		const user =
+			await this.repository.selectAccountByMail(email)
 
-		for (
-			const [field, valid] of
-			Object.entries(validations)
-		) {
-			if (!valid) throw new UnauthorizedError({
-				'errCode': "INVALID_CREDENTIALS",
-				'errItems': [field]
+		return user.length > 0 ? user[0] : null
+	}
+
+	/**
+	 * @param {string} email 
+	 */
+	async #checkMailConflict(email) {
+		if (await this.#checkMailExists(email)) {
+			throw new UnprocessableEntity({
+				'errCode': "EMAIL_CONFLICT"
 			})
 		}
 	}
 
-	async #checkEmailExists(email) {
-		const user =
-			await this.repository.selectAccountByEmail(email)
-		if (user.length === 0) return null
+	/**
+	 * @param {string} email
+	 * @param {password} password 
+	 */
+	#validateCredsFormats(email, password) {
+		const validations =
+			new User(email, password).validateCreds()
 
-		return user[0]
+		// Check some invalid value
+		const item = Object.entries(validations).find(
+			item => !item[1]
+		)
+
+		if (item) throw new UnauthorizedError({
+			'errCode': "INVALID_CREDENTIALS",
+			'errItems': [item[0]]
+		})
 	}
 
-	/*
-			Crendentials token operations
-	*/
+	/**
+	 * @param {string} email
+	 * @param {string} password 
+	 */
+	async #validateCredsValues(email, password) {
+		const userRaw = await this.#checkMailExists(email);
+
+		if (!(
+			userRaw &&
+			User.comparePassword(password, userRaw.password)
+		)) {
+			throw new UnauthorizedError({
+				'errCode': "INVALID_CREDENTIALS"
+			})
+		}
+	}
 
 	/**
-	 * 
 	 * @param {string} userId 
 	 * @param {"user" | "admin"} userRole 
 	 * @returns {string}
@@ -69,7 +99,6 @@ export default class AuthService {
 	}
 
 	/**
-	 * 
 	 * @param {string} token
 	 * @returns {{
 	 * 	"sub": string, "role": string,
@@ -79,7 +108,13 @@ export default class AuthService {
 	 */
 	validateToken(token) {
 		try {
-			const credsData = jwt.verify(token);
+			const credsData = jwt.verify(
+				token,
+				process.env.TOKEN_SECRET,
+				{
+					'issuer': process.env.TOKEN_ISSUER,
+				}
+			);
 
 			return credsData
 
@@ -90,52 +125,22 @@ export default class AuthService {
 		}
 	}
 
-	/*
-			Email confirmation services
-	*/
 	/**
 	 * @typedef {string} mailConfirmToken
 	 */
 
 	/**
-	 * @returns {mailConfirmToken}
-	 */
-	#generateEmailConfirmToken() {
-		// Start token value
-    let token = "";
-
-    const chars = process.env.TOKEN_CHARS;
-
-		// Build token value
-    for (let i = 0; i < length; i++){
-        const i = crypto.randomInt(0, chars.length);
-        token = token + chars[i];
-    }
-
-    return token
-	}
-
-	/**
+	 * @param {number} length
 	 * @returns {string}
 	 */
-	#generateEmailConfirmCode() {
-		// Start initial code value
-		let code = "";
-		const digits = [
-			"0", "1", "2", "3", "4",
-			"5", "6", "7", "8", "9",
-		];
+	#generateMailConfirmCode(length) {
+		let n = "";
 
-		// Build code with quantity number
-		for (let i = 0; i < quantity; i++) {
-			const value = digits[Math.floor(
-				Math.random() * digits.length
-			)]
-
-			code = code + value;
+		while (n.length < length + 1) {
+			n = n + String(crypto.randomInt(0, 10))
 		};
 
-		return code
+		return n
 	}
 
 	/**
@@ -145,59 +150,32 @@ export default class AuthService {
 	 */
 	async registerAccount(email, password) {
 		// 1. Check data formats
-		const user = new (email, password)
-
-		this.#checkCredentialsFormat(user)
+		this.#validateCredsFormats(email, password)
 
 		// 2. Check if email alredy exists
-		let userRaw =
-			await this.#checkEmailExists(user.email)
-		if (userRaw) throw new UnprocessableEntity({
-			'errCode': "EMAIL_CONFLICT"
-		})
+		await this.#checkMailConflict(email);
 
 		// 3. create token and confirmation code
-		const code = this.#generateEmailConfirmCode();
+		const code = this.#generateMailConfirmCode(5);
+		const token = crypto.randomBytes(32).toString("hex");
 
 		// 4. Try send email message
-		try { sendMail(email, "mailConfirm", {
-			'html': {
-				'confirmCode': code
-			}
-		}) } catch (error){
-			throw new ServerSideError({
-				'errCode': "EMAIL_SEND_FAILED"
-			})
-		};
+		await sendMailConfirmMsg(email, code);
 
-		// 4. Create token and Store data
-		const token = this.#generateEmailConfirmToken(email);
-
+		// 5. Store data
 		await setKeyValue(`email_confirm:${token}`, email, 300);
-		await setKeyValue(`email_code:${token}`, code, 40);
+		await setKeyValue(`email_code:${token}`, code, 100);
 
-		// 5. return session token
+		// 6. return session token
 		return token
 	}
 
 	async accessAccount(email, password) {
 		// 1. Check data formats
-		const user = new User(email, password)
-
-		this.#checkCredentialsFormat(user)
+		this.#validateCredsFormats(email, password)
 
 		// 2. Validate both credentials
-		const userRaw =
-			await this.#checkEmailExists(user.email)
-
-		if (!(
-			userRaw &&
-			User.comparePassword(password, userRaw.password)
-		)) {
-			throw new UnauthorizedError({
-				'errCode': "INVALID_CREDENTIALS"
-			})
-		}
+		await this.#validateCredsValues(email, password);
 
 		// 3. return access token
 		const accessToken = this.#generateAccessToken(
