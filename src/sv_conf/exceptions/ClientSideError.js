@@ -3,16 +3,6 @@ const errCodes = [
   "EMAIL_CONFLICT", "TOO_MANY_REQUESTS"
 ]
 
-/*
-    Errors url description mapping
-*/
-const errorsDesc ={
-  401: "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Reference/Status/401",
-  409: "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Reference/Status/409",
-  422: "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Reference/Status/422",
-  429: "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Reference/Status/429",
-  500: "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Reference/Status/500",
-}
 
 /*
     Errors handling - Classes structure
@@ -48,7 +38,6 @@ export class UnauthorizedError extends ClientSideError{
     super(errCode, errItems);
 
     this.status = 401;
-    this.type = errorsDesc[401];
   }
 }
 
@@ -61,7 +50,6 @@ export class UnprocessableEntity extends ClientSideError{
     super(errCode, errItems);
 
     this.status = 422;
-    this.type = errorsDesc[422];
   }
 }
 
@@ -74,7 +62,6 @@ export class ConflictError extends ClientSideError{
     super(errCode, errItems);
 
     this.status = 409;
-    this.type = errorsDesc[409];
   }
 }
 
@@ -87,6 +74,5 @@ export class ManyRequestsError extends ClientSideError{
     super(errCode, errItems);
 
     this.status = 429;
-    this.type = errorsDesc[429];
   }
 }
