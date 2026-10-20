@@ -70,16 +70,18 @@ export default class AuthService {
 	 * @param {string} password 
 	 */
 	async #validateCredsValues(email, password) {
-		const userRaw = await this.#checkMailExists(email);
+		const data = await this.#checkMailExists(email);
 
 		if (!(
-			userRaw &&
-			User.comparePassword(password, userRaw.password)
+			data &&
+			User.comparePassword(password, data.password)
 		)) {
 			throw new UnauthorizedError({
 				'errCode': "INVALID_CREDENTIALS"
 			})
 		}
+
+		return data
 	}
 
 	/**
@@ -175,7 +177,9 @@ export default class AuthService {
 		this.#validateCredsFormats(email, password)
 
 		// 2. Validate both credentials
-		await this.#validateCredsValues(email, password);
+		const userRaw = await this.#validateCredsValues(
+			email, password
+		);
 
 		// 3. return access token
 		const accessToken = this.#generateAccessToken(

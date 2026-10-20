@@ -45,12 +45,12 @@ export function resolveResponse({
 export function setAuthCookie(type = "access", res, token) {
   // 1. Define default values
   let expMinutes = 30;
-  let name = "access_token"
+  let name = "accessToken"
 
   // 2. check cookie type
   if (type === "refresh") {
     expMinutes = 60;
-    name = "refresh_token";
+    name = "refreshToken";
   }
 
   // 3. Set cookie

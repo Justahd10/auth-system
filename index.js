@@ -35,17 +35,13 @@ await redisConnect();
 */
 app.use(handleError);
 
-/*
-    Server run
-*/
+// Server run
 const port = process.env.PORT;
 const server = app.listen(port, () => {
   console.log(`Authentication server running. Listening on port ${port}`)
 });
 
-/*
-    Closing sign handling
-*/
+// Closing sign handling
 process.on("SIGTERM", async ()=>{
   console.log("SIGTERM signal received. Closing HTTP Server")
   server.close();

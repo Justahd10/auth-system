@@ -11,29 +11,25 @@ import express from "express";
 const app = express();
 
 
-/*
-    Application level middlewares
-*/
+// Application level middlewares
 app.use(getDefaultMiddlewares());
 
-/*
-    Extensions middlewars
-*/
+// Extensions middlewars
 app.use(cors({
-  'origin': process.env.FRONTEND_SERVER,
+  'origin': process.env.FRONTEND_ORIGIN,
   'credentials': true
 }))
 app.use(cookieParser());
 app.use(cookieSession({
-    'name': 'session',
-    'signed': false
+  'name': 'session',
+  'signed': false
 }));
 
-/*
-    Native middlewares
-*/
+//  Native middlewares
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({
+  'extended': true
+}));
 
 app.set('json spaces', 2);
 

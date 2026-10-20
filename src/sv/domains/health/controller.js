@@ -13,9 +13,11 @@ export default class HealthController {
   }
 
   /** 
-   * @param {import('express').Response} res 
+   * @param {import('express').Request} req
+   * @param {import('express').Response} res
+   * @param {import('express').NextFunction} next
    */
-  testResponse(res) {
+  testResponse(req, res, next) {
     const testData = this.service.setEchoResponse()
 
     return resolveResponse({

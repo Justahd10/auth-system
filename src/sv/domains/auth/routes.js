@@ -22,14 +22,14 @@ export default function setAuthRoutes(app, controller){
   
   /* app.post(
     "/api/auth/email/:sessionToken/verify", 
-    (req, res)=> controller.handleEmailConfirmation
+    (req, res, next)=> controller.handleEmailConfirmation
   ) */
   /* app.post(
     "/api/auth/email/:sessionToken/resend", 
-    (req, res)=> controller.handleEmailConfirmation
+    (req, res, next)=> controller.handleEmailConfirmation
   ) */
   /* app.post(
     "/api/auth/email/:sessionToken/confirm", 
-    (req, res)=> controller.handleEmailConfirmation
+    (req, res, next)=> controller.handleEmailConfirmation
   ) */
 }

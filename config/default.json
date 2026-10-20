@@ -61,5 +61,11 @@
 
       ]
     }
+  },
+
+  "emailTemplates": {
+    "mailConfirmation": {
+      "subject": "Confirmação de email"
+    }
   }
 }

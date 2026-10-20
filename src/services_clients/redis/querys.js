@@ -1,4 +1,4 @@
-import { redisClient } from "./redis-client.js"
+import redisClient from "./client";
 
 
 
