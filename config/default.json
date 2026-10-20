@@ -1,0 +1,65 @@
+{
+  "jsonSpaces": 2,
+
+  "auth": {
+    "cookies": {
+      "cookieSession": "session",
+      "accessCookieExp": 180000,
+      "refreshCookieExp": 360000
+    },
+
+    "creds": {
+      "password": {
+        "regex": "/^.{8,}$/",
+        "bcryptSalt": 12
+      },
+
+      "email": {
+        "regex": "/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$/"
+      }
+    },
+
+    "tokens": {
+      "access": {
+        "type": "jwt",
+        "details": {
+          "exp": 900,
+          "header": "JWT",
+          "algorithm": "HS256"
+        }
+      },
+      "refresh": {
+        "type": "jwt",
+        "details": {
+          "exp": 3600,
+          "header": "JWT",
+          "algorithm": "HS256"
+        }
+      },
+      "mailConfirm": {
+        "type": "alphanumeric"
+      }
+    },
+
+    "redis": {
+      "mailConfirm": {
+        "token": 300,
+        "code": 100
+      }
+    }
+  },
+
+  "middlewares": {
+    "auth": {
+      "/api/auth/register": [
+
+      ],
+      "/api/auth/login": [
+
+      ],
+      "/api/auth/me": [
+
+      ]
+    }
+  }
+}
