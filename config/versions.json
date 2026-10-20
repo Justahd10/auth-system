@@ -1,0 +1,47 @@
+{
+  "dev": {
+    "http": {
+      "port": 3002,
+      "rateLimit": 5
+    },
+    "proxy": {},
+    "cors": {
+      "origins": [
+        "http://localhost:5137"
+      ],
+      "inclueCreds": true
+    },
+    "serviceClients": {
+      "postgres": {
+        "type": "critical"
+      },
+      "redis": {
+        "type": "critical"
+      },
+      "email": {
+        "type": "critical",
+        "service": "gmail"
+      }
+    },
+    "domainServices": {
+      "auth": {
+        "enabled": true,
+        "methods": [
+          "GET", "POST"
+        ],
+        "endpoints": [
+          "/api/auth/register",
+          "/api/auth/login",
+          "/api/auth/me"
+        ]
+      }
+    },
+    "shutdown": {
+      "awaitTime": 10000
+    }
+  },
+
+  "prod": {
+    
+  }
+}
