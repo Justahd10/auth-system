@@ -179,6 +179,5 @@ class AppConfig {
 }
 
 const appConfig = new AppConfig("dev");
-appConfig.load()
 
 export default appConfig
