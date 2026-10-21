@@ -5,27 +5,39 @@ import email from "../clients/EmailClient.js";
 
 
 
-// 1. Start errors list
-const errs = [];
+/**
+ * @typedef {object} ClientConfigInterface
+ * @property {function} set
+ * @property {function} test
+ * @property {function} quit
+ */
 
-const { env, version } = appConfig.data;
+/**
+ * @typedef {object} ClientErrInterface
+ * @property {string} client
+ * @property {string} issue
+ */
+
+
+const { env, version: { clients } } = appConfig.data;
 
 export const clientsConfigs = {
   'database': {
-    'set': () => db.connect(env[DB_CONNECTION]),
+    'set': () => db.create(env['DB_CONNECTION']
+    ),
     'test': db.verify,
     'close': db.quit
   },
   'redis': {
-    'set': () => redis.connect(
-      env[REDIS_URL], env[REDIS_USER], env[REDIS_PASSWORD]
+    'set': () => redis.create(
+      env['REDIS_URL'], env['REDIS_USER'], env['REDIS_PASSWORD']
     ),
     'test': redis.verify,
     'close': redis.quit
   },
   'email': {
-    'set': () => email.connect(
-      "gmail", env[EMAIL_FROM], env[EMAIL_APP_PASSWORD]
+    'set': () => email.create(
+      "gmail", env['EMAIL_FROM'], env['EMAIL_APP_PASSWORD']
     ),
     'test': email.verify,
     'close': email.quit
@@ -33,49 +45,57 @@ export const clientsConfigs = {
 };
 
 
-function handleClient() {
-  Object.entries(clientsConfigs).forEach(config => {
-    // 1. Check client its configured
-    const client = version.clients[config[0]];
+/**
+ * @param {string} clientName
+ * @returns {Promise<ClientErrInterface | void>}
+ */
+async function handleClientSession(clientName) {
+  try {
+    // 1. Create session
+    await clientsConfigs[clientName].set();
 
-    try {
-      if (client) {
-
-        // 2. Set connection
-        config[1].set();
-
-        // 3. Check test requeriment
-        if (client.type === "critical") {
-          config[1].test()
-        };
-      }
-      
-    } catch (error) {
-
-      // 4. Append error
-      errs.push({
-        'client': config[0],
-        'issue': error.message
-      });
+    // 2. Check test requeriment
+    if (clients[clientName].isCritical) {
+      await clientsConfigs[clientName].test()
     };
-  });
 
-  return errs
-}
+  } catch (error) {
+    // 3. Append error
+    return {
+      'client': clientName,
+      'issue': error.message
+    }
+  }
+};
 
-export default function handleClientsSetup() {
+/**
+ * @param {object[]} errs 
+ */
+function resolveErrMsg(errs) {
+  return errs.map(
+    err => (
+      `Client: ${err.client} | Issue: ${err.issue}`
+    )
+  ).join("\n");
+};
+
+
+export default async function handleClientsSetup() {
   // 1. Setup clients
-  handleClient();
+  const errs = [];
 
-  // 2. Check errors
-  if (errs.length > 0){
-    const errMsg = errs.map(err => (
-      `Client: ${err.client} | Issue: ${err.issue}` 
-    )).join("\n");
+  // 2. handle sessions
+  for (const client of Object.keys(clientsConfigs)){
+    const err = await handleClientSession(client);
+
+    if (err) errs.push(err);
+  }
+
+  // 3. Check errors
+  if (errs.length > 0) {
+    const errMsg = resolveErrMsg(errs);
 
     console.error(errMsg);
     process.exit(1);
   }
 }
-
-handleClientsSetup()
