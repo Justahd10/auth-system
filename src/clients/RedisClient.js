@@ -12,14 +12,14 @@ class RedisClient {
    * @param {string} usrname 
    * @param {string} pass 
    */
-  async connect(url, usrname, pass) {
-    console.log("Creating redis database service client...");
+  async create(url, usrname, pass) {
+    console.log("Creating redis session...");
     client = createClient({
       'url': url,
       'username': usrname,
       'password': pass
     });
-
+    
     await client.connect();
   }
 
@@ -50,13 +50,16 @@ class RedisClient {
    * @param {string | undefined} msg 
    */
   async verify(msg = undefined) {
-    console.log("Testing reds database connection...");
-    /* test connection */
+    console.log("Testing redis session...");
+    await client.ping(msg)
   }
 
-  quit() {
-    console.log("Closing redis database service connection...");
-    client.quit();
+  /**
+   *  @returns {Promise<string>}
+   */
+  async quit() {
+    console.log("Closing redis session...");
+    const result = await client.quit();
   }
 };
 
