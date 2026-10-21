@@ -32,10 +32,8 @@ function createPayload(req, res, next) {
 }
 
 
-export default function getDefaultMiddlewares() {
-  return [
-    setTimestamp,
-    createPayload,
-    validateRateLimit
-  ]
+export {
+  setTimestamp,
+  createPayload,
+  validateRateLimit
 }
