@@ -11,6 +11,7 @@ const mailTemplateSchema = z.object({
 const validators = {
   'default': z.object({
     'jsonSpaces': z.literal(2),
+    
     'auth': z.object({
       'cookies': z.object({
         'cookieSession': z.literal("session"),
@@ -52,13 +53,6 @@ const validators = {
           'token': z.number(),
           'code': z.number()
         }).strict()
-      }).strict()
-    }).strict(),
-    'middlewares': z.object({
-      'auth': z.object({
-        '/api/auth/register': z.array(z.string()),
-        '/api/auth/login': z.array(z.string()),
-        '/api/auth/me': z.array(z.string())
       }).strict()
     }).strict(),
 
