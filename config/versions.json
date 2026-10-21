@@ -13,13 +13,13 @@
     },
     "clients": {
       "database": {
-        "type": "critical"
+        "isCritical": true
       },
       "redis": {
-        "type": "critical"
+        "isCritical": true
       },
       "email": {
-        "type": "critical",
+        "isCritical": true,
         "service": "gmail"
       }
     },
