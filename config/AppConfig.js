@@ -14,7 +14,41 @@ const __dirname = import.meta.dirname;
 const templatePath = path.join(__dirname, "email_templates");
 
 class AppConfig {
-  #errs = []
+  #errs = [];
+
+  #errsResolvers = {
+    /**
+     * @param {Error} err 
+     */
+    'json': (err) => err.errors.forEach(errItem => {
+      this.#errs.push({
+        'type': "env",
+        'field': this.#resolveEnvErrField(errItem),
+        'cause': errItem.keyword
+      })
+    }),
+
+    /**
+     * @param {Error} err 
+     */
+    'env': (err) => err.issues.forEach(err => {
+      this.#errs.push({
+        'type': "json",
+        'field': err.path.at(-1),
+        'cause': err.code
+      });
+    }),
+
+    /**
+     * @param {Error} err
+     */
+    'html': (err) => this.#errs.push({
+      'type': "html",
+      'field': err.name,
+      'cause': err.code
+    })
+  }
+
 
   /**
    * @param {keyof typeof versionsConfig} type
@@ -31,7 +65,6 @@ class AppConfig {
    * @typedef {import('zod').ZodError} zodErr
    */
 
-
   /**
    * @param {Error} err
    */
@@ -42,35 +75,6 @@ class AppConfig {
         return err.instancePath.replace("/", "")
       case "required":
         return err.params.missingProperty
-    }
-  }
-
-  /**
-   * @param {Error | zodErr} err 
-   * @param {"json" | "env"} configType 
-   */
-  #resolveConfigErrs(err, configType) {
-    // handle configuration type
-    switch (configType) {
-
-      case "env":
-        err.errors.forEach(errItem => {
-          this.#errs.push({
-            'type': "env",
-            'field': this.#resolveEnvErrField(errItem),
-            'cause': errItem.keyword
-          })
-        });
-        break;
-
-      case "json":
-        err.issues.forEach(err => {
-          this.#errs.push({
-            'type': "json",
-            'field': err.path.at(-1),
-            'cause': err.code
-          });
-        });
     }
   }
 
@@ -102,7 +106,7 @@ class AppConfig {
 
     } catch (error) {
       // Check errors
-      this.#resolveConfigErrs(error, "json");
+      this.#errsResolvers.json(error);
     }
   }
 
@@ -111,7 +115,7 @@ class AppConfig {
    */
   #validateEnvConfigErrs() {
     try {
-      // Validate creds configurations
+      // 1. Validate creds configurations
       const envConfig = envSchema({
         'schema': schema,
         'dotenv': {
@@ -119,12 +123,12 @@ class AppConfig {
         },
       });
 
-      // Return creds configurations
+      // 2. Return creds configurations
       this.data.env = envConfig;
 
     } catch (error) {
-      // Check errors
-      this.#resolveConfigErrs(error, "env");
+      // 3. Check errors
+      this.#errsResolvers.env(error);
     }
   }
 
@@ -132,33 +136,31 @@ class AppConfig {
    * @param {string[]} files 
    */
   #appendHtmlContent(files) {
-    files.forEach(file => {
-      this.data.emailTemplates[file.replace(".html", "")] =
+    // 1. Create key into config
+    this.data.emailTemplates = Object.fromEntries(
+      files.map(file => [
+        file.replace(".html", ""),
         fs.readFileSync(
-          templatePath + "/" + file, {
+          path.join(templatePath, file), {
           'encoding': "utf-8"
         }
         )
-    })
+      ])
+    );
   }
 
   #getEmailTemplates() {
-    this.data.template = {};
-
     // 2. try read files
     try {
       const files = fs.readdirSync(templatePath, {
         'encoding': "utf-8"
-      })
+      });
 
-      this.#appendHtmlContent(files)
+      this.#appendHtmlContent(files);
 
     } catch (error) {
-      this.#errs.push(
-        `Location: HTML files | ` +
-        `Issue: ${error.message} | ` +
-        `Code: ${error.code}`
-      )
+      // Check errors
+      this.#errsResolvers.html(error)
     }
   }
 
@@ -167,7 +169,7 @@ class AppConfig {
     this.#validateJsonConfigErrs();
     this.#validateEnvConfigErrs();
     this.#getEmailTemplates();
-    console.log(this.#errs)
+
     // Check results
     if (this.#errs.length > 0) {
       console.error(this.#resolveErrorsMsg());
@@ -178,4 +180,5 @@ class AppConfig {
 
 const appConfig = new AppConfig("dev");
 appConfig.load()
+
 export default appConfig
