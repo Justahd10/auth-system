@@ -1,3 +1,4 @@
+import fs from "fs";
 import path from "path";
 import envSchema from "env-schema";
 import schema from "./env-config.js";
@@ -7,9 +8,13 @@ import defaultConfig from "./default.json" with {'type': "json"};
 import versionsConfig from "./versions.json" with {'type': "json"};
 
 
+
 const __dirname = import.meta.dirname;
 
-export default class AppConfig {
+const templatePath = path.join(__dirname, "email_templates");
+
+class AppConfig {
+  #errs = []
 
   /**
    * @param {keyof typeof versionsConfig} type
@@ -18,7 +23,6 @@ export default class AppConfig {
     this.type = type;
 
     // placeholders
-    this.errs = [];
     this.data = {};
   }
 
@@ -31,9 +35,9 @@ export default class AppConfig {
   /**
    * @param {Error} err
    */
-  #resolveEnvErrField(err){
-    switch (err.keyword){
-      
+  #resolveEnvErrField(err) {
+    switch (err.keyword) {
+
       case "type":
         return err.instancePath.replace("/", "")
       case "required":
@@ -45,13 +49,13 @@ export default class AppConfig {
    * @param {Error | zodErr} err 
    * @param {"json" | "env"} configType 
    */
-  #resolveConfigErrs(err, configType){
+  #resolveConfigErrs(err, configType) {
     // handle configuration type
     switch (configType) {
 
       case "env":
-        err.errors.forEach(errItem =>{
-          this.errs.push({
+        err.errors.forEach(errItem => {
+          this.#errs.push({
             'type': "env",
             'field': this.#resolveEnvErrField(errItem),
             'cause': errItem.keyword
@@ -61,7 +65,7 @@ export default class AppConfig {
 
       case "json":
         err.issues.forEach(err => {
-          this.errs.push({
+          this.#errs.push({
             'type': "json",
             'field': err.path.at(-1),
             'cause': err.code
@@ -70,10 +74,10 @@ export default class AppConfig {
     }
   }
 
-  #resolveErrorsMsg(){
-    return this.errs.map(errItem =>(
-      `Location: ${errItem.type} | `+
-      `Field: ${errItem.field} | ` + 
+  #resolveErrorsMsg() {
+    return this.#errs.map(errItem => (
+      `Location: ${errItem.type} | ` +
+      `Field: ${errItem.field} | ` +
       `Cause: ${errItem.cause}`
     )).join("\n")
   }
@@ -94,7 +98,7 @@ export default class AppConfig {
 
       // Return configurations
       this.data.default = defaultConfig;
-      this.data.versions = versionsConfig[this.type];
+      this.data.version = versionsConfig[this.type];
 
     } catch (error) {
       // Check errors
@@ -114,7 +118,7 @@ export default class AppConfig {
           'path': path.join(__dirname, "..", ".env")
         },
       });
-      
+
       // Return creds configurations
       this.data.env = envConfig;
 
@@ -124,21 +128,54 @@ export default class AppConfig {
     }
   }
 
+  /**
+   * @param {string[]} files 
+   */
+  #appendHtmlContent(files) {
+    files.forEach(file => {
+      this.data.emailTemplates[file.replace(".html", "")] =
+        fs.readFileSync(
+          templatePath + "/" + file, {
+          'encoding': "utf-8"
+        }
+        )
+    })
+  }
+
+  #getEmailTemplates() {
+    this.data.template = {};
+
+    // 2. try read files
+    try {
+      const files = fs.readdirSync(templatePath, {
+        'encoding': "utf-8"
+      })
+
+      this.#appendHtmlContent(files)
+
+    } catch (error) {
+      this.#errs.push(
+        `Location: HTML files | ` +
+        `Issue: ${error.message} | ` +
+        `Code: ${error.code}`
+      )
+    }
+  }
+
   load() {
     // Get and validate configurations
     this.#validateJsonConfigErrs();
     this.#validateEnvConfigErrs();
-
+    this.#getEmailTemplates();
+    console.log(this.#errs)
     // Check results
-    if (this.errs.length > 0){
+    if (this.#errs.length > 0) {
       console.error(this.#resolveErrorsMsg());
       process.exit(1);
     }
   }
 }
 
-const config = new AppConfig("dev");
-
-config.load()
-
-console.log(config.data)
+const appConfig = new AppConfig("dev");
+appConfig.load()
+export default appConfig

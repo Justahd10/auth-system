@@ -11,8 +11,8 @@
       ],
       "inclueCreds": true
     },
-    "serviceClients": {
-      "postgres": {
+    "clients": {
+      "database": {
         "type": "critical"
       },
       "redis": {

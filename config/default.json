@@ -1,24 +1,20 @@
 {
   "jsonSpaces": 2,
-
   "auth": {
     "cookies": {
       "cookieSession": "session",
       "accessCookieExp": 180000,
       "refreshCookieExp": 360000
     },
-
     "creds": {
       "password": {
         "regex": "/^.{8,}$/",
         "bcryptSalt": 12
       },
-
       "email": {
         "regex": "/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$/"
       }
     },
-
     "tokens": {
       "access": {
         "type": "jwt",
@@ -40,7 +36,6 @@
         "type": "alphanumeric"
       }
     },
-
     "redis": {
       "mailConfirm": {
         "token": 300,
@@ -48,24 +43,19 @@
       }
     }
   },
-
   "middlewares": {
     "auth": {
-      "/api/auth/register": [
-
-      ],
-      "/api/auth/login": [
-
-      ],
-      "/api/auth/me": [
-
-      ]
+      "/api/auth/register": [],
+      "/api/auth/login": [],
+      "/api/auth/me": []
     }
   },
-
-  "emailTemplates": {
-    "mailConfirmation": {
-      "subject": "Confirmação de email"
+  "email": {
+    "confirmation": {
+      "hasTemplate": true,
+      "format": {
+        "subject": "Confirmação de email"
+      }
     }
   }
 }

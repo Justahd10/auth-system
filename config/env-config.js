@@ -2,35 +2,38 @@
 const schema = {
   'type': "object",
   'required': [
-    "AUTH_TOKEN_SECRET",
-    "AUTH_TOKEN_ISSUER",
-    "SERVICE_EMAIL_FROM",
-    "SERVICE_DB_CONNECTION",
-    "SERVICE_REDIS_URL",
-    "SERVICE_REDIS_USER",
-    "SERVICE_REDIS_PASSWORD",
-    "SERVICE_EMAIL_APP_PASSWORD"
+    "TOKEN_SECRET",
+    "TOKEN_ISSUER",
+    "EMAIL_FROM",
+    "DB_CONNECTION",
+    "REDIS_URL",
+    "REDIS_USER",
+    "REDIS_PASSWORD",
+    "EMAIL_APP_PASSWORD"
   ],
   'properties': {
-    'AUTH_TOKEN_SECRET': {
+    'TOKEN_SECRET': {
       'type': "string"
     },
-    'AUTH_TOKEN_ISSUER': {
+    'TOKEN_ISSUER': {
       'type': "string"
     },
-    'SERVICE_EMAIL_APP_PASSWORD': {
+    'EMAIL_FROM': {
       'type': "string"
     },
-    'SERVICE_DB_CONNECTION': {
+    'EMAIL_APP_PASSWORD': {
       'type': "string"
     },
-    'SERVICE_REDIS_URL': {
+    'DB_CONNECTION': {
       'type': "string"
     },
-    'SERVICE_REDIS_USER': {
+    'REDIS_URL': {
       'type': "string"
     },
-    'SERVICE_REDIS_PASSWORD': {
+    'REDIS_USER': {
+      'type': "string"
+    },
+    'REDIS_PASSWORD': {
       'type': "string"
     }
   }

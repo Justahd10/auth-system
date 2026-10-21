@@ -1,6 +1,12 @@
 import z from "zod";
 
 
+const mailTemplateSchema = z.object({
+  'hasTemplate': z.boolean(),
+  'format': z.object({
+    'subject': z.string()
+  })
+})
 
 const validators = {
   'default': z.object({
@@ -54,7 +60,11 @@ const validators = {
         '/api/auth/login': z.array(z.string()),
         '/api/auth/me': z.array(z.string())
       }).strict()
-    }).strict()
+    }).strict(),
+
+    'email': z.record(
+      z.string(), mailTemplateSchema
+    )
   }).strict()
 };
 

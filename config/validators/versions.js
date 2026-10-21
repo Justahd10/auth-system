@@ -13,8 +13,8 @@ const validators = {
       'origins': z.array(z.string()),
       'inclueCreds': z.boolean()
     }).strict(),
-    'serviceClients': z.object({
-      'postgres': z.object({
+    'clients': z.object({
+      'database': z.object({
         'type': z.literal("critical")
       }).strict(),
       'redis': z.object({
