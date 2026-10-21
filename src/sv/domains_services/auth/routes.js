@@ -1,35 +1,67 @@
-// import middlewares
+import db from '../../../clients/PostgresClient.js';
+import UserRepository from './repository.js';
+import AuthService from './services.js';
+import AuthController from './controller.js';
 
 
 
-/**
- * @param {import('express').Application} app
- * @param {import('./controller').default} controller 
- */
-export default function setAuthRoutes(app, controller){
-  app.post(
-    "/api/auth/register", 
-    (req, res, next)=> controller.handleRegister(req, res, next)
-  );
-  app.post(
-    "/api/auth/login", 
-    (req, res, next)=> controller.handleLogin(req, res, next)
-  );
-  app.get(
-    "/api/auth/me", 
-    (req, res, next)=> controller.handleAuthDetails(req, res, next)
-  );
-  
-  /* app.post(
-    "/api/auth/email/:sessionToken/verify", 
-    (req, res, next)=> controller.handleEmailConfirmation
-  ) */
-  /* app.post(
-    "/api/auth/email/:sessionToken/resend", 
-    (req, res, next)=> controller.handleEmailConfirmation
-  ) */
-  /* app.post(
-    "/api/auth/email/:sessionToken/confirm", 
-    (req, res, next)=> controller.handleEmailConfirmation
-  ) */
-}
+// Set domain service layers
+const repository = new UserRepository(db);
+const services = new AuthService(repository);
+const controller = new AuthController(services);
+
+
+
+// Domain services routes
+const routes = [
+  {
+    'method': "POST",
+    'endpoint': "/api/auth/register",
+    'middlewares': [
+
+    ],
+    "handler": controller.handleRegister
+  },
+  {
+    'method': "POST",
+    'endpoint': "/api/auth/login",
+    'middlewares': [
+
+    ],
+    "handler": controller.handleLogin
+  },
+  {
+    'method': "GET",
+    'endpoint': "/api/auth/me",
+    'middlewares': [
+
+    ],
+    "handler": controller.handleAuthDetails
+  },
+  /* {
+    'method': "GET",
+    'endpoint': "/api/auth/me",
+    'middlewares': [
+
+    ],
+    "handler": controller.handleAuthDetails
+  },
+  {
+    'method': "GET",
+    'endpoint': "/api/auth/me",
+    'middlewares': [
+
+    ],
+    "handler": controller.handleAuthDetails
+  },
+  {
+    'method': "GET",
+    'endpoint': "/api/auth/me",
+    'middlewares': [
+
+    ],
+    "handler": controller.handleAuthDetails
+  } */
+];
+
+export default routes
