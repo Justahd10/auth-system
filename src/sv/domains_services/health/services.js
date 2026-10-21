@@ -1,4 +1,4 @@
-class HealthService{
+export default class HealthService{
     constructor(repository = null){
 
     }
@@ -10,5 +10,3 @@ class HealthService{
         }
     }
 }
-
-export default HealthService
