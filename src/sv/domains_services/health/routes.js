@@ -1,14 +1,20 @@
-// import middlewares
+import HealthService from "./services.js";
+import HealthController from "./controller.js";
 
 
 
-/**
- * @param {import('express').Application} app 
- * @param {import('./controller').default} controller 
- */
-export default function setHealthRoutes(app, controller){
-    app.get(
-        "/health/ping", 
-        (req, res, next)=> controller.testResponse(req, res, next)
-    )
-}
+const services = new HealthService();
+const controller = new HealthController(services);
+
+const routes = [
+    {
+        'method': "GET",
+        'endpoint': "/api/health/ping",
+        'middlewares': [
+
+        ],
+        'handler': controller.testResponse
+    }
+];
+
+export default routes
