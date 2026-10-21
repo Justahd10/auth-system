@@ -2,6 +2,12 @@ import z from "zod";
 
 
 
+const domainConfigSchema = z.object({
+  'disabledEndpoints': z.boolean(),
+  'disabledMethods ': z.array(z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"])),
+  'endpoints': z.array(z.string())
+}).strict()
+
 const validators = {
   'dev': z.object({
     'http': z.object({
@@ -26,11 +32,8 @@ const validators = {
       }).strict()
     }).strict(),
     'domainServices': z.object({
-      'auth': z.object({
-        'enabled': z.boolean(),
-        'methods': z.array(z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"])),
-        'endpoints': z.array(z.string())
-      }).strict()
+      'auth': z.record(domainConfigSchema),
+      'health': z.record(domainConfigSchema)
     }).strict(),
     'shutdown': z.object({
       'awaitTime': z.number()
