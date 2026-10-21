@@ -17,8 +17,8 @@ class EmailClient {
    * @param {string} usr 
    * @param {string} pass 
    */
-  connect(service, usr, pass) {
-    console.log("Creating email service client...");
+  create(service, usr, pass) {
+    console.log("Creating email session...");
     emailTransporter = nodemailer.createTransport({
       'service': service,
       'auth': {
@@ -80,12 +80,12 @@ class EmailClient {
   }
 
   async verify() {
-    console.log("Testing email service connection...");
+    console.log("Testing email session...");
     await emailTransporter.verify();
   }
 
   async quit() {
-    console.log("Closing email service connection...")
+    console.log("Closing email session...")
     await emailTransporter.close()
   }
 };
