@@ -1,10 +1,14 @@
 {
-  "jsonSpaces": 2,
+  "http": {
+    "jsonSpaces": 2,
+    "urlEncoded": {
+      "extended": true
+    }
+  },
   "auth": {
     "cookies": {
-      "cookieSession": "session",
-      "accessCookieExp": 180000,
-      "refreshCookieExp": 360000
+      "accessExp": 180000,
+      "refreshExp": 360000
     },
     "creds": {
       "password": {
@@ -41,13 +45,6 @@
         "token": 300,
         "code": 100
       }
-    }
-  },
-  "middlewares": {
-    "auth": {
-      "/api/auth/register": [],
-      "/api/auth/login": [],
-      "/api/auth/me": []
     }
   },
   "email": {
