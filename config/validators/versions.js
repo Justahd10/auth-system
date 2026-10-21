@@ -15,13 +15,13 @@ const validators = {
     }).strict(),
     'clients': z.object({
       'database': z.object({
-        'type': z.literal("critical")
+        'isCritical': z.boolean()
       }).strict(),
       'redis': z.object({
-        'type': z.literal("critical")
+        'isCritical': z.boolean()
       }).strict(),
       'email': z.object({
-        'type': z.literal("critical"),
+        'isCritical': z.boolean(),
         'service': z.string()
       }).strict()
     }).strict(),
