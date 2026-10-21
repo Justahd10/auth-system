@@ -5,11 +5,15 @@
       "rateLimit": 5
     },
     "proxy": {},
-    "cors": {
+    "cookiesSession": {
+      "name": "session",
+      "signed": false
+    },
+    "corsFormat": {
       "origins": [
         "http://localhost:5137"
       ],
-      "inclueCreds": true
+      "credentials": true
     },
     "clients": {
       "database": {
@@ -26,12 +30,19 @@
     "domainServices": {
       "auth": {
         "enabled": true,
-        "methods": [
-          "GET", "POST"
+        "disabledMethods": [
+          "DELETE", "PATCH"
         ],
-        "endpoints": [
-          "/api/auth/register",
-          "/api/auth/login",
+        "disabledEndpoints": [
+          "/api/auth/me"
+        ]
+      },
+      "health": {
+        "enabled": true,
+        "disabledMethods": [
+          "DELETE", "PATCH"
+        ],
+        "disabledEndpoints": [
           "/api/auth/me"
         ]
       }
