@@ -101,7 +101,7 @@ class AppConfig {
       );
 
       // Return configurations
-      this.data.default = defaultConfig;
+      this.data.defaultConfig = defaultConfig;
       this.data.version = versionsConfig[this.type];
 
     } catch (error) {
@@ -124,7 +124,7 @@ class AppConfig {
       });
 
       // 2. Return creds configurations
-      this.data.env = envConfig;
+      this.data.envConfig = envConfig;
 
     } catch (error) {
       // 3. Check errors
