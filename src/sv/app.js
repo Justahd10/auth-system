@@ -47,4 +47,4 @@ app.use(express.urlencoded(urlEncoded));
 app.set('json spaces', jsonSpaces);
 
 
-export { app }
+export default app
