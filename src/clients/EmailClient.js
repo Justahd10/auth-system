@@ -1,29 +1,42 @@
-import appConfig from "../../config/AppConfig.js";
 import nodemailer from "nodemailer";
 
 
 
-let emailTransporter; // client
-
-
-class EmailClient {
-  #templates = appConfig.data.emailTemplates;
-  #from = appConfig.data.env.EMAIL_FROM;
-  #msgTypes = appConfig.data.default.email;
-
-
+export default class EmailClient {
+  
   /**
    * @param {string} service 
    * @param {string} usr 
-   * @param {string} pass 
+   * @param {string} pass
    */
-  create(service, usr, pass) {
+  constructor(
+    service, 
+    usr, 
+    pass, 
+    from, 
+    templates, 
+    msgFormats
+  ) {
+    this.service = service;
+    this.usr = usr;
+    this.pass = pass;
+
+    this.from = from;
+    this.templates = templates;
+    this.msgFormats = msgFormats;
+
+    /** @type {import('nodemailer').Transporter | null} */
+    this.transporter = null;
+  }
+
+  createTransporter() {
     console.log("Creating email session...");
-    emailTransporter = nodemailer.createTransport({
-      'service': service,
+
+    this.transporter = nodemailer.createTransport({
+      'service': this.service,
       'auth': {
-        'user': usr,
-        'pass': pass
+        'user': this.usr,
+        'pass': this.pass
       }
     });
   }
@@ -40,13 +53,13 @@ class EmailClient {
    * @param {MsgFormatInterface} param0;
    */
   #resolveMsgFormat({ to, type, text, htmlValues }) {
-    const msgType = this.#msgTypes[type];
+    const msgType = this.msgFormats[type];
     
     // 1. Start initial format
     const msgFormat = { ...msgType.format };
 
     // 2. Append parameters
-    msgFormat.from = this.#from;
+    msgFormat.from = this.from;
     msgFormat.to = to;
 
     // 3. Resolve text
@@ -55,7 +68,7 @@ class EmailClient {
     // 4. Resolve Html
     if (msgType.hasTemplate){
       Object.entries(htmlValues).forEach(item => {
-        this.#templates[type]
+        this.templates[type]
           .replaceAll(item[0], item[1])
       });
     };
@@ -68,7 +81,7 @@ class EmailClient {
    * @param {string} code 
    */
   async sendMailConfirmMsg(to, code) {
-    await emailTransporter.sendEmail(
+    await this.transporter.sendEmail(
       this.#resolveMsgFormat({
         'to': to,
         'type': "confirmation",
@@ -81,16 +94,13 @@ class EmailClient {
 
   async verify() {
     console.log("Testing email session...");
-    await emailTransporter.verify();
+
+    await this.transporter.verify();
   }
 
-  async quit() {
-    console.log("Closing email session...")
-    await emailTransporter.close()
+  quit() {
+    console.log("Closing email session...");
+
+    this.transporter.close();
   }
 };
-
-
-const email = new EmailClient();
-
-export default email;

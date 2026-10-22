@@ -1,39 +1,38 @@
-import appConfig from "../../config/AppConfig";
 import { clientsConfigs } from "./client-setup";
-import tasksController from "../workers/bg-tasks-controller";
 
 
-
-const { default: { shutdown } } = appConfig.data
 
 /**
- * @param {function} shutdownFn 
+ * @param {string[]} signals 
+ * @param {function} listenFn
  */
-function setTrigger(shutdownFn) {
-  
-}
+export function setTrigger(signals, listenFn) {
+  signals.forEach(signal => process.on(signal, listenFn));
+};
 
-// 2. Security timeout
-function setSecureTimetout() {
-  
-}
+/**
+ * @param {number} time 
+ */
+export function setSecureTimetout(time) {
+  const timeout = setTimeout(() => {
+    console.log(
+      "Shutdown timed out. Forcing process exit..."
+    );
+    process.exit(1);
+  }, time);
 
-// 3. HTTP sessions closing
-function closeHttpSessions() {
+  return timeout
+};
 
-}
+/**
+ * @param {import('node:http').Server} server 
+ */
+export function closeHttpSessions(server) {
+  server.close();
+};
 
-// 4. Client sessions closing
-function closeClientSessions() {
-
-}
-
-// 5. Await background tasks
-function closeBackgroundTasks() {
-
-}
-
-
-export default function setShutdown() {
-
-}
+export async function closeClientSessions() {
+  for (const config of Object.values(clientsConfigs)) {
+    await config.close()
+  };
+};

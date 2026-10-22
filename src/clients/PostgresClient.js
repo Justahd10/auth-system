@@ -2,20 +2,25 @@ import pgPromise from "pg-promise";
 
 
 
-// Local client setting
-let pgp;
-let databaseClient;
+export default class PostgresClient {
 
+  /**
+   * @param {string} connectString 
+   */
+  constructor(connectString) {
+    this.connectString = connectString;
 
-class PostgresClient {
+    this.pgp = null;
+    this.db = null;
+  }
 
   /**
    * @param {string} connectionString 
    */
-  create(connectionString) {
+  connect() {
     console.log("Creating postgres session...");
-    pgp = pgPromise();
-    databaseClient = pgp(connectionString);
+    this.pgp = pgPromise();
+    this.db = pgp(this.connectString);
   }
 
   /* Query models */
@@ -25,7 +30,7 @@ class PostgresClient {
    */
   async verify() {
     console.log("Testing postgres session...");
-    await databaseClient.connect();
+    await this.db.connect();
   }
 
   /**
@@ -33,11 +38,6 @@ class PostgresClient {
    */
   quit() {
     console.log("Closing postgres session...")
-    pgp.end();
+    this.pgp.end();
   }
 }
-
-// Client instance
-const db = new PostgresClient();
-
-export default db;

@@ -4,11 +4,11 @@ const schema = {
   'required': [
     "TOKEN_SECRET",
     "TOKEN_ISSUER",
-    "EMAIL_FROM",
     "DB_CONNECTION",
     "REDIS_URL",
     "REDIS_USER",
     "REDIS_PASSWORD",
+    "EMAIL_FROM",
     "EMAIL_APP_PASSWORD"
   ],
   'properties': {

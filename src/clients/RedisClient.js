@@ -2,7 +2,7 @@ import { createClient } from "redis";
 
 
 
-let client;
+/** @typedef {import('redis').RedisClientType | null} redisClient */
 
 
 class RedisClient {
@@ -12,17 +12,36 @@ class RedisClient {
    * @param {string} usrname 
    * @param {string} pass 
    */
-  async create(url, usrname, pass) {
+  constructor(
+    url,
+    usrName,
+    pass
+  ) {
+    this.url = url;
+    this.usrName = usrName;
+    this.pass = pass;
+
+    /** @type {redisClient} */
+    this.client = null;
+  }
+
+  async create() {
     console.log("Creating redis session...");
+
     client = createClient({
-      'url': url,
-      'username': usrname,
-      'password': pass
+      'url': this.url,
+      'username': this.usrName,
+      'password': this.pass
     });
     
     await client.connect();
   }
 
+  /**
+   * @param {string} name 
+   * @param {string} value 
+   * @param {number | null} exp 
+   */
   async setKeyValue(name, value, exp = null) {
     await client.set(name, value, {
       'expiration': exp ? {
@@ -36,14 +55,14 @@ class RedisClient {
    * @param {string} name 
    */
   async getKeyValue(name) {
-    return await client.get(name);
+    return await this.client.get(name);
   }
 
   /**
    * @param {string} name 
    */
   async delKey(name) {
-    return await client.del(name);
+    return await this.client.del(name);
   }
 
   /**
@@ -51,7 +70,8 @@ class RedisClient {
    */
   async verify(msg = undefined) {
     console.log("Testing redis session...");
-    await client.ping(msg)
+
+    await this.client.ping(msg)
   }
 
   /**
@@ -59,7 +79,8 @@ class RedisClient {
    */
   async quit() {
     console.log("Closing redis session...");
-    const result = await client.quit();
+
+    const result = await this.client.quit();
   }
 };
 

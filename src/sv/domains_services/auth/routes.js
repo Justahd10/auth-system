@@ -1,4 +1,3 @@
-import db from '../../../clients/PostgresClient.js';
 import UserRepository from './repository.js';
 import AuthService from './services.js';
 import AuthController from './controller.js';

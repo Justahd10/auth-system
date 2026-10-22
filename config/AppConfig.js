@@ -13,7 +13,7 @@ const __dirname = import.meta.dirname;
 
 const templatePath = path.join(__dirname, "email_templates");
 
-class AppConfig {
+export default class AppConfig {
   #errs = [];
 
   #errsResolvers = {
@@ -177,7 +177,3 @@ class AppConfig {
     }
   }
 }
-
-const appConfig = new AppConfig("dev");
-
-export default appConfig
