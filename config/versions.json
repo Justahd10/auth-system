@@ -46,9 +46,6 @@
           "/api/auth/me"
         ]
       }
-    },
-    "shutdown": {
-      "awaitTime": 10000
     }
   },
 
