@@ -5,6 +5,14 @@
       "extended": true
     }
   },
+
+  "shutdown": {
+    "awaitTime": 20000,
+    "signals": [
+      "SIGTERM", "SIGINT", "SIGKILL"
+    ]
+  },
+
   "auth": {
     "cookies": {
       "accessExp": 180000,
