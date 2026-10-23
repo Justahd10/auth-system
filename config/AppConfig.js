@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import envSchema from "env-schema";
 import schema from "./env-config.js";
 import defaultConfigValidators from "./validators/default.js";
@@ -37,15 +35,6 @@ export default class AppConfig {
         'field': err.path.at(-1),
         'cause': err.code
       });
-    }),
-
-    /**
-     * @param {Error} err
-     */
-    'html': (err) => this.#errs.push({
-      'type': "html",
-      'field': err.name,
-      'cause': err.code
     })
   }
 
@@ -149,26 +138,10 @@ export default class AppConfig {
     );
   }
 
-  #getEmailTemplates() {
-    // 2. try read files
-    try {
-      const files = fs.readdirSync(templatePath, {
-        'encoding': "utf-8"
-      });
-
-      this.#appendHtmlContent(files);
-
-    } catch (error) {
-      // Check errors
-      this.#errsResolvers.html(error)
-    }
-  }
-
   load() {
     // Get and validate configurations
     this.#validateJsonConfigErrs();
     this.#validateEnvConfigErrs();
-    this.#getEmailTemplates();
 
     // Check results
     if (this.#errs.length > 0) {
