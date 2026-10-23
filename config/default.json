@@ -5,14 +5,14 @@
       "extended": true
     }
   },
-
   "shutdown": {
     "awaitTime": 20000,
     "signals": [
-      "SIGTERM", "SIGINT", "SIGKILL"
+      "SIGTERM",
+      "SIGINT",
+      "SIGKILL"
     ]
   },
-
   "auth": {
     "cookies": {
       "accessExp": 180000,
@@ -55,12 +55,12 @@
       }
     }
   },
-  "email": {
-    "confirmation": {
-      "hasTemplate": true,
+  "emailMsgs": [
+    {
+      "template": "confirmation",
       "format": {
         "subject": "Confirmação de email"
       }
     }
-  }
+  ]
 }
