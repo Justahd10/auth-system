@@ -5,6 +5,8 @@ export default function runBootstrap() {
   // Load configurations
 
   
-  // Handle clients connections
+  // Register email messages
 
+
+  // Handle clients connections
 }
