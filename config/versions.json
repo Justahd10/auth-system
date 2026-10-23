@@ -16,22 +16,44 @@
       "credentials": true
     },
     "clients": {
-      "database": {
-        "isCritical": true
+      "postgres": {
+        "type": "critical",
+        "connections": [
+          {
+            "name": "db:main",
+            "env": "PG_CONNECTION"
+          }
+        ]
       },
       "redis": {
-        "isCritical": true
+        "type": "critical",
+        "connections": [
+          {
+            "name": "redis:mail_confirm",
+            "env": "REDIS_CONNECTION_1"
+          },
+          {
+            "name": "redis:pass_reset",
+            "env": "REDIS_CONNECTION_2"
+          }
+        ]
       },
       "email": {
-        "isCritical": true,
-        "service": "gmail"
+        "type": "critical",
+        "connections": [
+          {
+            "name": "email:gmail_service",
+            "env": "GMAIL_TRANSPORTER"
+          }
+        ]
       }
     },
     "domainServices": {
       "auth": {
         "enabled": true,
         "disabledMethods": [
-          "DELETE", "PATCH"
+          "DELETE",
+          "PATCH"
         ],
         "disabledEndpoints": [
           "/api/auth/me"
@@ -40,7 +62,8 @@
       "health": {
         "enabled": true,
         "disabledMethods": [
-          "DELETE", "PATCH"
+          "DELETE",
+          "PATCH"
         ],
         "disabledEndpoints": [
           "/api/auth/me"
@@ -48,8 +71,5 @@
       }
     }
   },
-
-  "prod": {
-    
-  }
+  "prod": {}
 }
