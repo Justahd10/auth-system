@@ -5,12 +5,6 @@ import {
 	UnprocessableEntity
 } from "../../exceptions/ClientSideError.js";
 import User from "./model.js";
-import { sendMailConfirmMsg } from "./email_service/messages.js";
-import {
-	setKeyValue,
-	getKeyValue,
-	delKey
-} from "../../../redis_conf/querys.js";
 
 
 
