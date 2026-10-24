@@ -1,0 +1,72 @@
+{
+  "http": {
+    "port": 3002,
+    "rateLimit": 5
+  },
+  "proxy": {},
+  "cookiesSession": {
+    "name": "session",
+    "signed": false
+  },
+  "corsFormat": {
+    "origins": [
+      "http://localhost:5137"
+    ],
+    "credentials": true
+  },
+  "clients": {
+    "postgres": {
+      "type": "critical",
+      "connections": [
+        {
+          "name": "db:main",
+          "env": "PG_CONNECTION"
+        }
+      ]
+    },
+    "redis": {
+      "type": "critical",
+      "connections": [
+        {
+          "name": "redis:mail_confirm",
+          "env": "REDIS_CONNECTION_1"
+        },
+        {
+          "name": "redis:pass_reset",
+          "env": "REDIS_CONNECTION_2"
+        }
+      ]
+    },
+    "email": {
+      "type": "critical",
+      "connections": [
+        {
+          "name": "email:gmail_service",
+          "env": "GMAIL_TRANSPORTER"
+        }
+      ]
+    }
+  },
+  "domainServices": {
+    "auth": {
+      "enabled": true,
+      "disabledMethods": [
+        "DELETE",
+        "PATCH"
+      ],
+      "disabledEndpoints": [
+        "/api/auth/me"
+      ]
+    },
+    "health": {
+      "enabled": true,
+      "disabledMethods": [
+        "DELETE",
+        "PATCH"
+      ],
+      "disabledEndpoints": [
+        "/api/auth/me"
+      ]
+    }
+  }
+}

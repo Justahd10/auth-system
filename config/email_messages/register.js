@@ -3,7 +3,6 @@ import path from "path";
 
 
 
-
 /**
  * @typedef {object} emailMsgFormat
  * @property {string} subject
