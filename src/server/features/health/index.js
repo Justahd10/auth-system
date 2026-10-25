@@ -5,10 +5,12 @@ import createHealthRoutes from "./routes";
 
 
 /**
- * @param {import('express').Application} app 
- * @param {import('../../types').domainConfig} config
+ * @param {object} dependencies 
  */
-export default function createHealthDomain(app, config) {
+export default function createHealthDomain(dependencies) {
+  // Select required data
+  const { app, config } = dependencies
+
   // Domain layers building
   const service = new HealthService();
   const controller = new HealthController(service);

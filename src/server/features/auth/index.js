@@ -5,12 +5,10 @@ import createRoutes from "./routes";
 
 
 
-/**
- * @param {import('express').Application} app 
- * @param {import('pg-promise').IDatabase} db
- * @param {import('../../types').domainConfig} config
- */
-export default function createAuthDomain(app, db, config) {
+export default function createAuthDomain(dependencies) {
+  // Get required dependencies
+  const { app, db, config } = dependencies;
+
   // Domain layers building
   const repository = new UserRepository(db);
   const services = new AuthService(repository);
